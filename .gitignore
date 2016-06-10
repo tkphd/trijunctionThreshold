@@ -29,6 +29,7 @@ src/mmsp/utility/mmsp2png
 src/mmsp/utility/mmsp2pvd
 src/mmsp/utility/mmsp2vti
 src/mmsp/utility/mmsp2topo
+src/mmsp/utility/mmsp2tsv
 src/mmsp/utility/mmsp2xyz
 src/mmsp/utility/wrongendian
 
