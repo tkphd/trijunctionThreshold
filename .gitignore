@@ -1,0 +1,47 @@
+# Generic and TeX
+*~
+*.asc
+*.aux
+*.backup
+*.bak
+*.dvi
+*.gz
+*.log
+*.orig
+*.pdf
+*.toc
+*.txt
+*.zip
+
+# Data and Executables
+*.dat
+*.log
+*.out
+*.png
+*.pvd
+*.sh
+*.vti
+*.xy
+*.xyz
+
+# MMSP utility binaries
+src/mmsp/utility/mmsp2png
+src/mmsp/utility/mmsp2pvd
+src/mmsp/utility/mmsp2vti
+src/mmsp/utility/mmsp2topo
+src/mmsp/utility/mmsp2xyz
+src/mmsp/utility/wrongendian
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a

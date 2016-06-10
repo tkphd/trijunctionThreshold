@@ -1,0 +1,7 @@
+This directory contains MMSP code for grain growth simulations using a multiphase-field method [1].
+
+Send questions or comments to trevor.keller@gmail.com (Trevor Keller)
+
+References:
+
+1. I. Steinbach and F Pezzolla. "A generalized field method for multiphase transformations using interface fields." Physica D 134 (1999) 385-393.
