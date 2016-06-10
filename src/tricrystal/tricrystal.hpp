@@ -1,8 +1,8 @@
-// graingrowth.hpp
+// tricrystal.hpp
 // Anisotropic sparse phase field (sparsePF) grain growth example code
 // Questions/comments to gruberja@gmail.com (Jason Gruber)
 
-std::string PROGRAM = "graingrowth";
+std::string PROGRAM = "tricrystal";
 std::string MESSAGE = "Sparse phase field (sparsePF) grain growth code with vertex drag";
 
 typedef double phi_type;
