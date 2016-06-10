@@ -16,11 +16,8 @@
 #include<mpi.h>
 #endif
 #include"MMSP.hpp"
-#include"anisotropy.hpp"
 #include"graingrowth.hpp"
 #include"tessellate.hpp"
-
-typedef float phi_type;
 
 bool isLittleEndian() {
 	short int number = 0x1;

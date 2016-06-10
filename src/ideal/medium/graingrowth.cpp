@@ -12,17 +12,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#if (defined CCNI) || (defined BGQ)
+#ifdef BGQ
 #include<mpi.h>
 #endif
 #include"MMSP.hpp"
-#include"anisotropy.hpp"
 #include"graingrowth.hpp"
 #include"tessellate.hpp"
-
-typedef float phi_type;
-
-void print_progress(const int step, const int steps, const int iterations);
 
 bool isLittleEndian() {
 	short int number = 0x1;
@@ -33,11 +28,11 @@ bool isLittleEndian() {
 namespace MMSP {
 
 void generate(int dim, char* filename) {
-	#if (!defined MPI_VERSION || MPI_VERSION<2) && ((defined CCNI) || (defined BGQ))
+	#if (!defined MPI_VERSION || MPI_VERSION<2) && (defined BGQ)
 	std::cerr<<"Error: MPI-2 is required for CCNI."<<std::endl;
 	exit(1);
 	#endif
-  static unsigned long tstart;
+	static unsigned long tstart;
 
  	int id=0;
 	#ifdef MPI_VERSION
@@ -65,11 +60,11 @@ void generate(int dim, char* filename) {
 		#endif
 		if (id==0) std::cout<<"."<<std::endl;
 
-		#if (!defined MPI_VERSION) && ((defined CCNI) || (defined BGQ))
+		#if (!defined MPI_VERSION) && (defined BGQ)
 		std::cerr<<"Error: CCNI requires MPI."<<std::endl;
 		std::exit(1);
 		#endif
-	  tstart = time(NULL);
+		tstart = time(NULL);
 		tessellate<2,phi_type>(grid, number_of_fields);
 		if (id==0) std::cout<<"Tessellation complete ("<<time(NULL)-tstart<<" sec)."<<std::endl;
 		#ifdef MPI_VERSION
@@ -100,11 +95,11 @@ void generate(int dim, char* filename) {
 		#endif
 		if (id==0) std::cout<<"."<<std::endl;
 
-		#if (!defined MPI_VERSION) && ((defined CCNI) || (defined BGQ))
+		#if (!defined MPI_VERSION) && (defined BGQ)
 		std::cerr<<"Error: CCNI requires MPI."<<std::endl;
 		std::exit(1);
 		#endif
-	  tstart = time(NULL);
+		tstart = time(NULL);
 		tessellate<3,phi_type>(grid, number_of_fields);
 		//const std::string seedfile("points2.txt");
 		//tessellate<3,phi_type>(grid, seedfile);
@@ -119,7 +114,7 @@ void generate(int dim, char* filename) {
 }
 
 template <int dim> void update(MMSP::grid<dim, sparse<phi_type> >& grid, int steps) {
-	#if (!defined MPI_VERSION) && ((defined CCNI) || (defined BGQ))
+	#if (!defined MPI_VERSION) && (defined BGQ)
 	std::cerr<<"Error: MPI is required for CCNI."<<std::endl;
 	exit(1);
 	#endif
@@ -134,7 +129,7 @@ template <int dim> void update(MMSP::grid<dim, sparse<phi_type> >& grid, int ste
 	static int iterations = 1;
 
 	for (int step = 0; step < steps; step++) {
-		if (id==0) print_progress(step, steps, iterations);
+		if (id==0) print_progress(step, steps);
 		// update grid must be overwritten each time
 		ghostswap(grid);
 		MMSP::grid<dim, sparse<phi_type> > update(grid);
@@ -229,27 +224,6 @@ template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s) {
 
 } // namespace MMSP
 
-void print_progress(const int step, const int steps, const int iterations) {
-	char* timestring;
-	static unsigned long tstart;
-	struct tm* timeinfo;
-
-	if (step==0) {
-		tstart = time(NULL);
-		std::time_t rawtime;
-		std::time( &rawtime );
-		timeinfo = std::localtime( &rawtime );
-		timestring = std::asctime(timeinfo);
-		timestring[std::strlen(timestring)-1] = '\0';
-		std::cout<<"Pass "<<std::setw(3)<<std::right<<iterations<<": "<<timestring<<" ["<<std::flush;
-	} else if (step==steps-1) {
-		unsigned long deltat = time(NULL)-tstart;
-		std::cout<<"•] "<<std::setw(2)<<std::right<<deltat/3600<<"h:"
-										<<std::setw(2)<<std::right<<(deltat%3600)/60<<"m:"
-										<<std::setw(2)<<std::right<<deltat%60<<"s"
-										<<" (File "<<std::setw(5)<<std::right<<iterations*steps<<")."<<std::endl;
-	} else if ((20 * step) % steps == 0) std::cout<<"• "<<std::flush;
-}
 #endif
 
 #include"MMSP.main.hpp"
