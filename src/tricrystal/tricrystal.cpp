@@ -223,7 +223,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 		MPI::COMM_WORLD.Allreduce(&x[0], &v1, 1, MPI_INT, MPI_MAX);
 		#endif
 
-		double theta = std::atan2(dx(oldGrid,1)*10, dx(oldGrid,0)*(v1-v0));
+		double theta = 180.0/M_PI * std::atan2(dx(oldGrid,1)*10, dx(oldGrid,0)*(v1-v0));
 		std::ofstream vfile;
 		if (rank==0) {
 			vfile.open("v.log",std::ofstream::out | std::ofstream::app);
