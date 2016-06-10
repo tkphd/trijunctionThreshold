@@ -1,6 +1,7 @@
-// File:    mmsp2topo2.cpp
+// File:    mmsp2graph.cpp
 // Purpose: reads MMSP grid containing sparse vector of order parameters
-//          writes grain topology and grain-graph data using fast marching algorithm
+//          writes grain-graph data using fast marching algorithm:
+//          a better approach than the flattened representation of mmsp2topo
 
 // Questions/Comments to trevor.keller@gmail.com (Trevor Keller)
 
