@@ -35,7 +35,7 @@ void generate(int dim, char* filename)
 	if (rank==0) {
 		std::ofstream vfile("v.log",std::ofstream::out);
 		vfile.close();
-    }
+	}
 
 
 	if (dim == 2)	{
@@ -131,8 +131,8 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 				for (int k = -1; k <= 1; k++) {
 				  x[j] += k;
 				  for (int h = 0; h < length(oldGrid(x)); h++) {
-				    int pindex = index(oldGrid(x), h);
-				    set(s, pindex) = 1;
+					int pindex = index(oldGrid(x), h);
+					set(s, pindex) = 1;
 				  }
 				  x[j] -= k;
 				}
@@ -150,14 +150,14 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 				for (int h = 0; h < length(s); h++) {
 				  int hindex = index(s, h);
 				  for (int j = h + 1; j < length(s); j++) {
-				    int jindex = index(s, j);
-				    phi_type gamma = energy(hindex, jindex);
-				    phi_type eps = 4.0 / acos(-1.0) * sqrt(0.5 * gamma * width);
-				    phi_type w = 4.0 * gamma / width;
-				    // Update dFdp_h
-				    set(dFdp, hindex) += 0.5 * eps * eps * lap[jindex] + w * oldGrid(i)[jindex];
-				    // Update dFdp_j, so the inner loop can be over j>h instead of j≠h
-				    set(dFdp, jindex) += 0.5 * eps * eps * lap[hindex] + w * oldGrid(i)[hindex];
+					int jindex = index(s, j);
+					phi_type gamma = energy(hindex, jindex);
+					phi_type eps = 4.0 / acos(-1.0) * sqrt(0.5 * gamma * width);
+					phi_type w = 4.0 * gamma / width;
+					// Update dFdp_h
+					set(dFdp, hindex) += 0.5 * eps * eps * lap[jindex] + w * oldGrid(i)[jindex];
+					// Update dFdp_j, so the inner loop can be over j>h instead of j≠h
+					set(dFdp, jindex) += 0.5 * eps * eps * lap[hindex] + w * oldGrid(i)[hindex];
 				  }
 				}
 
@@ -173,64 +173,77 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 						int jindex = index(s, j);
 						set(dpdt, hindex) -= mu * (dFdp[hindex] - dFdp[jindex]);
 						set(dpdt, jindex) -= mu * (dFdp[jindex] - dFdp[hindex]);
-				  }
+					}
 				}
 
 				// compute update values
 				phi_type sum = 0.0;
 				for (int h = 0; h < length(s); h++) {
-				  int pindex = index(s, h);
-				  phi_type value = oldGrid(i)[pindex] + dt * (2.0 / S) * dpdt[pindex]; // Extraneous factor of 2?
-				  if (value > 1.0) value = 1.0;
-				  if (value < 0.0) value = 0.0;
-				  if (value > epsilon) set(newGrid(i), pindex) = value;
-				  sum += newGrid(i)[pindex];
+					int pindex = index(s, h);
+					phi_type value = oldGrid(i)[pindex] + dt * (2.0 / S) * dpdt[pindex]; // Extraneous factor of 2?
+					if (value > 1.0) value = 1.0;
+					if (value < 0.0) value = 0.0;
+					if (value > epsilon) set(newGrid(i), pindex) = value;
+					sum += newGrid(i)[pindex];
 				}
 
 				// project onto Gibbs simplex (enforce Σφ=1)
 				phi_type rsum = 0.0;
 				if (fabs(sum) > 0.0) rsum = 1.0 / sum;
 				for (int h = 0; h < length(newGrid(i)); h++) {
-				  int pindex = index(newGrid(i), h);
-				  set(newGrid(i), pindex) *= rsum;
+					int pindex = index(newGrid(i), h);
+					set(newGrid(i), pindex) *= rsum;
 				}
 			}
 
 		} // Loop over nodes(oldGrid)
 
-		// Scan along just above the mid-line for the grain boundary.
-		// When found, determine its angle.
-		vector<int> x(dim, 0);
-		x[0] = x0(oldGrid,0);
-		x[1] = 5+(g1(oldGrid,1) - g0(oldGrid,1))/2;
-		while (x[0]<x1(oldGrid) && x[1]>=y0(oldGrid) && x[1]<y1(oldGrid) && newGrid(x)[2]>0.9)
-			x[0]++;
-		if (x[0] == x0(oldGrid))
-			x[0] = g0(oldGrid,0);
-		int v0 = x[0];
-		#ifdef MPI_VERSION
-		MPI::COMM_WORLD.Allreduce(&x[0], &v0, 1, MPI_INT, MPI_MAX);
-		#endif
+		if (step % 10 == 0) {
+			// Scan along just above the mid-line for the grain boundary.
+			// When found, determine its angle.
+			vector<int> x(dim, 0);
+			int delta = 3;
+			phi_type contour = 0.505;
 
-		x[0] = x0(oldGrid,0);
-		x[1] = 15+(g1(oldGrid,1) - g0(oldGrid,1))/2;
-		while (x[0]<x1(oldGrid) && x[1]>=y0(oldGrid) && x[1]<y1(oldGrid) && newGrid(x)[2]>0.9)
-			x[0]++;
-		if (x[0] == x0(oldGrid))
-			x[0] = g0(oldGrid,0);
-		int v1 = x[0];
-		#ifdef MPI_VERSION
-		MPI::COMM_WORLD.Allreduce(&x[0], &v1, 1, MPI_INT, MPI_MAX);
-		#endif
+			x[0] = x0(newGrid,0);
+			x[1] = (g1(newGrid,1) - g0(newGrid,1))/2;
+			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+				x[0]++;
+			if (x[0] == x0(newGrid))
+				x[0] = g0(newGrid,0);
+			int v0 = x[0];
+			#ifdef MPI_VERSION
+			MPI::COMM_WORLD.Allreduce(&x[0], &v0, 1, MPI_INT, MPI_MAX);
+			#endif
 
-		double theta = 180.0/M_PI * std::atan2(dx(oldGrid,1)*10, dx(oldGrid,0)*(v1-v0));
-		std::ofstream vfile;
-		if (rank==0) {
-			vfile.open("v.log",std::ofstream::out | std::ofstream::app);
-			vfile << dx(oldGrid,0)*v0 << '\t' << dx(oldGrid,0)*v1 << '\t' << theta << std::endl;
-			vfile.close();
+			x[1] += delta;
+			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+				x[0]++;
+			if (x[0] == x0(newGrid))
+				x[0] = g0(newGrid,0);
+			int v1 = x[0];
+			#ifdef MPI_VERSION
+			MPI::COMM_WORLD.Allreduce(&x[0], &v1, 1, MPI_INT, MPI_MAX);
+			#endif
+
+			x[1] += delta;
+			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+				x[0]++;
+			if (x[0] == x0(newGrid))
+				x[0] = g0(newGrid,0);
+			int v2 = x[0];
+			#ifdef MPI_VERSION
+			MPI::COMM_WORLD.Allreduce(&x[0], &v2, 1, MPI_INT, MPI_MAX);
+			#endif
+
+			double theta = 180.0/M_PI * std::atan2(dx(newGrid,1)*delta, dx(newGrid,0)*(v2-v1));
+			std::ofstream vfile;
+			if (rank==0) {
+				vfile.open("v.log",std::ofstream::out | std::ofstream::app);
+				vfile << dx(newGrid,0)*v0 << '\t' << dx(newGrid,0)*v1 << '\t' << dx(newGrid,0)*v2 << '\t' << theta << '\n';
+				vfile.close();
+			}
 		}
-
 
 		swap(oldGrid, newGrid);
 	} // Loop over steps
@@ -238,10 +251,10 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 }
 
 template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s) {
-	o<<"    Index  Value\n";
+	o<<"	Index  Value\n";
 	for (int i=0; i<length(s); ++i) {
 		int pindex = index(s, i);
-		o<<"    "<<std::setw(5)<<std::right<<pindex<<"  "<<s[pindex]<<'\n';
+		o<<"	"<<std::setw(5)<<std::right<<pindex<<"  "<<s[pindex]<<'\n';
 	}
 	return o;
 }
