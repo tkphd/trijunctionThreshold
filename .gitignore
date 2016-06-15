@@ -25,6 +25,7 @@
 *.xyz
 
 # MMSP utility binaries
+src/drag/mobility2png
 src/mmsp/utility/mmsp2png
 src/mmsp/utility/mmsp2pvd
 src/mmsp/utility/mmsp2vti
