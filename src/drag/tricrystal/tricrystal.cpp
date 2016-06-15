@@ -104,6 +104,10 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	const phi_type mu_hi = 1.00;
 	const phi_type mu_lo = 0.01;
 
+	std::ofstream vfile;
+	if (rank==0)
+		vfile.open("v.log",std::ofstream::out | std::ofstream::app);
+
 	for (int step = 0; step < steps; step++) {
 		if (rank==0) print_progress(step, steps);
 		// newGrid grid must be overwritten each time
@@ -198,19 +202,24 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 
 		} // Loop over nodes(oldGrid)
 
-		if (step % 10 == 0) {
+		if ((step+1) % 10 == 0) {
 			// Scan along just above the mid-line for the grain boundary.
 			// When found, determine its angle.
 			vector<int> x(dim, 0);
-			int delta = 3;
-			phi_type edge_contour = (1.0/std::sqrt(2.0) + 1.0)/2.0;
-			phi_type vert_contour = (1.0/std::sqrt(3.0) + 1.0/std::sqrt(2.0))/2.0;
+			const int delta = 3;
+
+			const phi_type vert_mag = 1.0/std::sqrt(3.0);
+			const phi_type edge_mag = 1.0/std::sqrt(2.0);
+			const phi_type bulk_mag = 1.0;
+
+			const phi_type edge_contour = edge_mag + 0.5*(bulk_mag - edge_mag);
+			const phi_type vert_contour = vert_mag + 0.5*(edge_mag - vert_mag);
 
 			x[0] = x0(newGrid,0);
 			x[1] = (g1(newGrid,1) - g0(newGrid,1))/2;
 			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) &&  newGrid(x).getMagPhi() > vert_contour)
 				x[0]++;
-			if (x[0] == x0(newGrid))
+			if (x[0] == x1(newGrid))
 				x[0] = g0(newGrid,0);
 			int v0 = x[0];
 			#ifdef MPI_VERSION
@@ -220,7 +229,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			x[1] += delta;
 			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
-			if (x[0] == x0(newGrid))
+			if (x[0] == x1(newGrid))
 				x[0] = g0(newGrid,0);
 			int v1 = x[0];
 			#ifdef MPI_VERSION
@@ -230,7 +239,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			x[1] += delta;
 			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
-			if (x[0] == x0(newGrid))
+			if (x[0] == x1(newGrid))
 				x[0] = g0(newGrid,0);
 			int v2 = x[0];
 			#ifdef MPI_VERSION
@@ -241,17 +250,17 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			double diffX = -3.0*v0 + 4.0*v1 - v2;
 			double theta = 180.0/M_PI * std::atan2(2.0*delta*dx(newGrid,1), dx(newGrid,0)*diffX);
 
-			std::ofstream vfile;
-			if (rank==0) {
-				vfile.open("v.log",std::ofstream::out | std::ofstream::app);
+			if (rank==0)
 				vfile << dx(newGrid,0)*v0 << '\t' << dx(newGrid,0)*v1 << '\t' << dx(newGrid,0)*v2 << '\t' << diffX << '\t' << theta << '\n';
-				vfile.close();
-			}
 		}
 
 		swap(oldGrid, newGrid);
 	} // Loop over steps
 	ghostswap(oldGrid);
+
+	if (rank==0)
+		vfile.close();
+
 }
 
 template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s) {
