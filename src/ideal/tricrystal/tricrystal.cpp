@@ -201,14 +201,14 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			// Scan along just above the mid-line for the grain boundary.
 			// When found, determine its angle.
 			vector<int> x(dim, 0);
-			int delta = 3;
+			int delta = 2;
 
 			const phi_type vert_mag = 1.0/std::sqrt(3.0);
 			const phi_type edge_mag = 1.0/std::sqrt(2.0);
 			const phi_type bulk_mag = 1.0;
 
-			const phi_type edge_contour = edge_mag + 0.5*(bulk_mag - edge_mag);
-			const phi_type vert_contour = vert_mag + 0.5*(edge_mag - vert_mag);
+			const phi_type edge_contour = edge_mag + 0.125*(bulk_mag - edge_mag);
+			const phi_type vert_contour = vert_mag + 0.125*(edge_mag - vert_mag);
 
 			x[0] = x0(newGrid,0);
 			x[1] = (g1(newGrid,1) - g0(newGrid,1))/2;
@@ -243,7 +243,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 
 
 			// Second-order right-sided difference to approximate slope
-			double diffX = -3.0*v0 + 4.0*v1 - v2;
+			double diffX = 3.0*v0 - 4.0*v1 + 1.0*v2;
 			double theta = 180.0/M_PI * std::atan2(2.0*delta*dx(newGrid,1), dx(newGrid,0)*diffX);
 
 			if (rank==0)

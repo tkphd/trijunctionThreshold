@@ -4,6 +4,7 @@
 *.aux
 *.backup
 *.bak
+*.directory
 *.dvi
 *.gz
 *.log
