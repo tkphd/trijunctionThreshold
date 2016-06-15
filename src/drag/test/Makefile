@@ -4,12 +4,14 @@
 
 # includes
 incdir = ../../mmsp/include
+utildir = ../../mmsp/utility
+algodir = ../../mmsp/algorithms
 
 # compilers/flags
 compiler = g++ -O3 -Wall
 pcompiler = mpic++ -O3 -Wall
 ccompiler = /usr/mpi/gcc/openmpi-1.8.4rc1/bin/mpic++ -O3 -Wall
-flags = -I$(incdir)
+flags = -I../ -I$(incdir) -I$(algodir) -I$(utildir)
 
 # IBM compiler for AMOS
 BG_XL = /bgsys/drivers/ppcfloor/comm/xl
@@ -21,17 +23,17 @@ qflags = $(BG_INC) $(BG_LIB) $(flags) -I/bgsys/apps/CCNI/zlib/zlib-1.2.7/include
 #qflags = $(BG_INC) $(BG_LIB) $(flags) $(CFLAGS) $(LDFLAGS)
 
 # the program
-tricrystal.out: tricrystal.cpp
+graingrowth.out: graingrowth.cpp
 	$(compiler) $(flags) $< -o $@ -lz
 
-parallel: tricrystal.cpp
+parallel: graingrowth.cpp
 	$(pcompiler) $(flags) -include mpi.h $< -o parallel_GG.out -lz
 
-ctcms: tricrystal.cpp
+ctcms: graingrowth.cpp
 	$(ccompiler) $(flags) -include mpi.h $< -o ctcms_GG.out -lz
 
-bgq: tricrystal.cpp
+bgq: graingrowth.cpp
 	$(qcompiler) -DBGQ $(qflags) $< -o q_GG.out -lz
 
 clean:
-	rm -rf tricrystal.out parallel_GG.out q_GG.out ctcms_GG.out fnbnd_GG.out
+	rm -rf graingrowth.out parallel_GG.out q_GG.out ctcms_GG.out fnbnd_GG.out

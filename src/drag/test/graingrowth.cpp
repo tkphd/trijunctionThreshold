@@ -45,8 +45,8 @@ void generate(int dim, char* filename) {
 	}
 	#endif
 	if (dim == 2)	{
-		const int edge = 4096;
-		int number_of_fields = 1282048;
+		const int edge = 1024;
+		int number_of_fields = 80896;
 		grid<2,sparse<phi_type> > initGrid(0, 0, edge, 0, edge);
 		if (rank==0) std::cout<<"Grid origin: ("<<g0(initGrid,0)<<','<<g0(initGrid,1)<<"),"
 				                <<" dimensions: "<<g1(initGrid,0)-g0(initGrid,0)<<" × "<<g1(initGrid,1)-g0(initGrid,1)
