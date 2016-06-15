@@ -198,11 +198,12 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			// When found, determine its angle.
 			vector<int> x(dim, 0);
 			int delta = 3;
-			phi_type contour = 0.505;
+			phi_type edge_contour = (1.0/std::sqrt(2.0) + 1.0)/2.0;
+			phi_type vert_contour = (1.0/std::sqrt(3.0) + 1.0/std::sqrt(2.0))/2.0;
 
 			x[0] = x0(newGrid,0);
 			x[1] = (g1(newGrid,1) - g0(newGrid,1))/2;
-			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>vert_contour)
 				x[0]++;
 			if (x[0] == x0(newGrid))
 				x[0] = g0(newGrid,0);
@@ -212,7 +213,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			#endif
 
 			x[1] += delta;
-			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
 			if (x[0] == x0(newGrid))
 				x[0] = g0(newGrid,0);
@@ -222,7 +223,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			#endif
 
 			x[1] += delta;
-			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x)[2]>contour)
+			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
 			if (x[0] == x0(newGrid))
 				x[0] = g0(newGrid,0);
@@ -231,11 +232,15 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			MPI::COMM_WORLD.Allreduce(&x[0], &v2, 1, MPI_INT, MPI_MAX);
 			#endif
 
-			double theta = 180.0/M_PI * std::atan2(dx(newGrid,1)*delta, dx(newGrid,0)*(v2-v1));
+
+			// Second-order right-sided difference to approximate slope
+			double diffX = -3.0*v0 + 4.0*v1 - v2;
+			double theta = 180.0/M_PI * std::atan2(2.0*delta*dx(newGrid,1), dx(newGrid,0)*diffX);
+
 			std::ofstream vfile;
 			if (rank==0) {
 				vfile.open("v.log",std::ofstream::out | std::ofstream::app);
-				vfile << dx(newGrid,0)*v0 << '\t' << dx(newGrid,0)*v1 << '\t' << dx(newGrid,0)*v2 << '\t' << theta << '\n';
+				vfile << dx(newGrid,0)*v0 << '\t' << dx(newGrid,0)*v1 << '\t' << dx(newGrid,0)*v2 << '\t' << diffX << '\t' << theta << '\n';
 				vfile.close();
 			}
 		}
