@@ -17,6 +17,7 @@
 
 # Data and Executables
 *.dat
+*.ipynb_checkpoints
 *.log
 *.out
 *.png

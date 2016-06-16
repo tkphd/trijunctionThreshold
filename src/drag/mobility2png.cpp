@@ -214,6 +214,8 @@ int main(int argc, char* argv[])
 				ptr = strtok(NULL,",");
 			}
 			delete [] cstr;
+		} else if (flag.substr(0,5) == "--fit") {
+			mode=std::max(4,mode);
 		} else if (flag.substr(0,5) == "--mob") {
 			mode=std::max(5,mode);
 		} else if (flag.find(".png") != std::string::npos) {
@@ -1133,17 +1135,20 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 					sum = GRID(n)[*it];
 			}
 		} else if (mode==3) { //  --exclude
-			for (int h=0; h<MMSP::fields(GRID); h++) {
+			for (int h=0; h<GRID(n).length(); h++) {
 				int i=GRID(n).index(i);
 				std::set<int>::iterator it=fieldset.find(i);
 				if (it == fieldset.end())
 					sum += pow(GRID(n).value(h),2.0);
 			}
+		} else if (mode==4) { //  --fit
+			for (int h=0; h<GRID(n).length(); h++)
+				sum += pow(GRID(n).value(h) - 0.5,2.0);
 		} else if (mode==5) {
 			sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(n).getMagPhi());
 		}
 
-		if (included!=1 && mode!=5)
+		if (included!=1 && mode<5)
 			sum = std::sqrt(sum);
 		if (sum>max)
 			max=sum;
@@ -1169,16 +1174,19 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 						sum = GRID(x)[*it];
 				}
 			} else if (mode==3) { //  --exclude
-				for (int h=0; h<MMSP::fields(GRID); h++) {
+				for (int h=0; h<GRID(x).length(); h++) {
 					int i=GRID(x).index(i);
 					std::set<int>::iterator it=fieldset.find(i);
 					if (it == fieldset.end())
 						sum += pow(GRID(x).value(h),2.0);
 				}
+			} else if (mode==4) { //  --fit
+				for (int h=0; h<GRID(x).length(); h++)
+					sum += pow(GRID(x).value(h) - 0.5,2.0);
 			} else if (mode==5) {
 				sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 			}
-			if ((mode!=2 && mode!=5) || included!=1)
+			if ((mode!=2 && mode<5) || included!=1)
 				sum = std::sqrt(sum);
 			assert(n<bufsize);
 			buffer[n] = 255*((sum-min)/(max-min));
@@ -1205,16 +1213,19 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 							sum = GRID(x)[*it];
 					}
 				} else if (mode==3) { //  --exclude
-					for (int h=0; h<MMSP::fields(GRID); h++) {
+					for (int h=0; h<GRID(x).length(); h++) {
 						int i=GRID(x).index(i);
 						std::set<int>::iterator it=fieldset.find(i);
 						if (it == fieldset.end())
 							sum += pow(GRID(x).value(h),2.0);
 					}
+				} else if (mode==4) { //  --fit
+					for (int h=0; h<GRID(x).length(); h++)
+						sum += pow(GRID(x).value(h) - 0.5,2.0);
 				} else if (mode==5) {
 					sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 				}
-				if ((mode!=2 && mode!=5) || included!=1)
+				if ((mode!=2 && mode<5) || included!=1)
 					sum = std::sqrt(sum);
 				assert(n<bufsize);
 				buffer[n] = 255*((sum-min)/(max-min));
@@ -1244,16 +1255,19 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 								sum = GRID(x)[*it];
 						}
 					} else if (mode==3) { //  --exclude
-						for (int h=0; h<MMSP::fields(GRID); h++) {
+						for (int h=0; h<GRID(x).length(); h++) {
 							int i=GRID(x).index(i);
 							std::set<int>::iterator it=fieldset.find(i);
 							if (it == fieldset.end())
 								sum += pow(GRID(x).value(h),2.0);
 						}
+					} else if (mode==4) { //  --fit
+						for (int h=0; h<GRID(x).length(); h++)
+							sum += pow(GRID(x).value(h) - 0.5,2.0);
 					} else if (mode==5) {
 						sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 					}
-					if ((mode!=2 && mode!=5) || included!=1)
+					if ((mode!=2 && mode<5) || included!=1)
 						sum = std::sqrt(sum);
 					assert(n<bufsize);
 					buffer[n] = 255*((sum-min)/(max-min));
