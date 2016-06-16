@@ -27,23 +27,13 @@ phi_type energy(int i, int j)
 	return 1.0;
 }
 
-template <int dim, class T> T mobility(const T mu_lo, const T mu_hi, const T phi)
+template <class T> T mobility(const T& mu_lo, const T& mu_hi, const T& mean, const T& devn, const double& phi)
 {
-	// Create an annulus of low mobility near vertices, based on Johnson & Voorhees
-	T mean = 0.6422; // centered between (0.5773, 0.7071)
-	T devn = 0.0175; // slope hits zero at (0.5773, 0.7071)
-
-	/* TJ Drag: *only* on triple junctions; vertices unaffected!
-	if (dim==3) {
-		mean = 0.56; // empirically determined
-		devn = 0.005;
-	}
-	*/
-
 	// Inverted, shifted Gaussian curve
-	T gauss = std::exp( -(phi - mean)*(phi - mean) / (2.0*devn*devn) );
+	double gauss = std::exp( -(phi - mean)*(phi - mean) / (2.0*devn*devn) );
 	T mobility = mu_hi -(mu_hi - mu_lo) * gauss;
 
+	#ifdef DEBUG
 	if (mobility > mu_hi + 0.001) {
 		std::cerr<<"Illegal mobility: too high! "<<mobility<<std::endl;
 		std::exit(-1);
@@ -51,6 +41,7 @@ template <int dim, class T> T mobility(const T mu_lo, const T mu_hi, const T phi
 		std::cerr<<"Illegal mobility: too low! "<<mobility<<std::endl;
 		std::exit(-1);
 	}
+	#endif
 	return mobility;
 }
 

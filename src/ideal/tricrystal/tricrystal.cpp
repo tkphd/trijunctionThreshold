@@ -156,9 +156,8 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 				    phi_type gamma = energy(hindex, jindex);
 				    phi_type eps = 4.0 / acos(-1.0) * sqrt(0.5 * gamma * width);
 				    phi_type w = 4.0 * gamma / width;
-				    // Update dFdp_h
+				    // Update dFdp_h and dFdp_j, so the inner loop can be over j>h instead of j≠h
 				    set(dFdp, hindex) += 0.5 * eps * eps * lap[jindex] + w * oldGrid(i)[jindex];
-				    // Update dFdp_j, so the inner loop can be over j>h instead of j≠h
 				    set(dFdp, jindex) += 0.5 * eps * eps * lap[hindex] + w * oldGrid(i)[hindex];
 				  }
 				}

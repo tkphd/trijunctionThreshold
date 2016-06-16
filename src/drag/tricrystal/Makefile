@@ -9,7 +9,7 @@ incdir = ../../mmsp/include
 compiler = g++ -O3 -Wall
 pcompiler = mpic++ -O3 -Wall
 ccompiler = /usr/mpi/gcc/openmpi-1.8.4rc1/bin/mpic++ -O3 -Wall
-flags = -I$(incdir)
+flags = -I../ -I$(incdir)
 
 # IBM compiler for AMOS
 BG_XL = /bgsys/drivers/ppcfloor/comm/xl

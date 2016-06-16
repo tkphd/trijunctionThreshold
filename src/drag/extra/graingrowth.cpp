@@ -88,8 +88,10 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	const phi_type dt = 0.01;
 	const phi_type width = 10.0;
 	const phi_type epsilon = 1.0e-8;
-	const phi_type mu_hi = 1.00;
-	const phi_type mu_lo = 0.01;
+	const double mu_hi = 1.00;
+	const double mu_lo = 0.01;
+	const double mu_x = 0.01;
+	const double mu_s = 0.01;
 
 	for (int step = 0; step < steps; step++) {
 		if (rank==0) print_progress(step, steps);
@@ -140,9 +142,8 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 				// compute time derivatives
 				sparse<phi_type> dpdt;
 				phi_type mag_phi = oldGrid(x).getMagPhi();
-				phi_type mu=1.0;
-				if (dim==2) mu = mobility<2>(mu_lo, mu_hi, mag_phi);
-				else if (dim==3) mu = mobility<3>(mu_lo, mu_hi, mag_phi);
+				phi_type mu = mobility(mu_lo, mu_hi, mu_x, mu_s, mag_phi);
+
 				for (int h = 0; h < length(s); h++) {
 					int hindex = index(s, h);
 					for (int j = h + 1; j < length(s); j++) {
