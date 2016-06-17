@@ -1254,49 +1254,47 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 			}
 		}
 
-		// Compute grain boundary profile
-		x = tj;
-		while (GRID(x).getMagPhi() < 0.9)
-			x[0]++;
+		if (mode==4) {
+			// Compute grain boundary profile
+			x = tj;
+			//while (GRID(x).getMagPhi() < 0.9)
+			//	x[0]++;
 
-		int nexp = std::min(100, MMSP::x1(GRID)-x[0]); // number of points
-		double* xexp = new double[nexp]; // raw data
-		double* yexp = new double[nexp]; // raw data
+			int nexp = std::min(100, MMSP::x1(GRID)-x[0]); // number of points
+			double* xexp = new double[nexp]; // raw data
+			double* yexp = new double[nexp]; // raw data
 
-		for (int i=0; i<nexp; i++) {
-			MMSP::vector<int> s(x);
-			double bottom = 2.0;
-			while (s[1]<MMSP::y1(GRID)-10) {
-				if (GRID(s).getMagPhi() < bottom) {
-					bottom = GRID(s).getMagPhi();
-					xexp[i] = MMSP::dx(GRID)*(s[0] - tj[0]);
-					yexp[i] = MMSP::dy(GRID)*(s[1] - tj[1]);
+			for (int i=0; i<nexp; i++) {
+				MMSP::vector<int> s(x);
+				double bottom = 2.0;
+				while (s[1]<MMSP::y1(GRID)-10) {
+					if (GRID(s).getMagPhi() < bottom) {
+						bottom = GRID(s).getMagPhi();
+						xexp[i] = MMSP::dx(GRID)*(s[0] - tj[0]);
+						yexp[i] = MMSP::dy(GRID)*(s[1] - tj[1]);
+					}
+					s[1]++;
 				}
-				s[1]++;
+				x[0]++;
 			}
-			x[0]++;
+
+			curvefitter tricrystal(nexp, xexp, yexp);
+
+			double a, theta;
+			tricrystal.fit(a, theta);
+
+			for (int i=0; i<nexp; i++) {
+				int xi = tj[0] + xexp[i]/MMSP::dx(GRID);
+				int yi = tj[1] + trijunction_profile(a, theta, xexp[i])/MMSP::dy(GRID);
+				int width = MMSP::x1(GRID)-MMSP::x0(GRID);
+				int height = MMSP::y1(GRID)-MMSP::y0(GRID);
+				int index = (height-yi)*width + xi;
+				buffer[index] = 0;
+			}
+
+			delete [] xexp;
+			delete [] yexp;
 		}
-
-		curvefitter tricrystal(nexp, xexp, yexp);
-
-		double a, theta;
-		tricrystal.fit(a, theta);
-
-		for (int i=0; i<nexp; i++) {
-			int xi = tj[0] + xexp[i]/MMSP::dx(GRID);
-			int yi = tj[1] + trijunction_profile(a, theta, xexp[i])/MMSP::dy(GRID);
-			int width = MMSP::x1(GRID)-MMSP::x0(GRID);
-			int height = MMSP::y1(GRID)-MMSP::y0(GRID);
-			int index = (height-yi)*width + xi;
-			buffer[index] = 0;
-			yi = tj[1] + yexp[i]/MMSP::dy(GRID);
-			index = (height-yi)*width + xi;
-			buffer[index] = 0;
-		}
-
-		delete [] xexp;
-		delete [] yexp;
-
 	} else if (dim==3) {
 		unsigned int n=0;
 		MMSP::vector<int> x(3,0);
