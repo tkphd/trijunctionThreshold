@@ -8,9 +8,10 @@ incdir = ../mmsp/include
 # compilers/flags
 compiler = g++ -O3 -Wall
 flags = -I$(incdir)
+links = -lz -lpng -lgsl -lgslcblas
 
 mobility2png: mobility2png.cpp
-	$(compiler) $(flags) $< -o $@ -lz -lpng
+	$(compiler) $(flags) $< -o $@ $(links)
 
 clean:
 	rm -rf mobility2png
