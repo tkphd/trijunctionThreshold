@@ -1290,8 +1290,7 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 		if (mode==CurveFit) {
 			// Compute grain boundary profile
 			x = tj;
-			//while (GRID(x).getMagPhi() < 0.9)
-			//	x[0]++;
+			printf("Vertex sits at (%i, %i)\n", tj[0], tj[1]);
 
 			int nexp = std::min(100, MMSP::x1(GRID)-x[0]); // number of points
 			double* xexp = new double[nexp]; // raw data
@@ -1466,8 +1465,9 @@ void curvefitter::fit(double& a, double& theta)
 	#define FIT(i) gsl_vector_get(s->x, i)
 	#define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
 
-	fprintf(stdout, "summary from %s fit: stopped after %zu iterations (%s)\n",
-	        gsl_multifit_fdfsolver_name(s), gsl_multifit_fdfsolver_niter(s), (info == 1) ? "small step size" : "small gradient");
+	fprintf(stdout, "summary from %s fit: %s after %zu iterations (%s)\n",
+	        gsl_multifit_fdfsolver_name(s), gsl_strerror(status), gsl_multifit_fdfsolver_niter(s),
+	        (info == 1) ? "threshold step size" : "threshold gradient");
 	{
 		double dof = n - p;
 		double c = GSL_MAX_DBL(1, chi / sqrt(dof));
@@ -1477,7 +1477,6 @@ void curvefitter::fit(double& a, double& theta)
 		fprintf (stdout, "  a   = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
 		fprintf (stdout, "theta = %.5f +/- %.5f\n", 180.0/M_PI*FIT(1), 180.0/M_PI*c*ERR(1));
 	}
-	fprintf (stdout, "status = %s\n", gsl_strerror (status));
 
 	a = FIT(0);
 	theta = FIT(1);
