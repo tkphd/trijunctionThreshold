@@ -9,8 +9,7 @@ algodir = ../../mmsp/algorithms
 
 # compilers/flags
 compiler = g++ -O3 -Wall
-pcompiler = mpic++ -O3 -Wall
-ccompiler = /usr/mpi/gcc/openmpi-1.8.4rc1/bin/mpic++ -O3 -Wall
+pcompiler = /usr/bin/mpic++.openmpi -O3 -Wall
 flags = -I../ -I$(incdir) -I$(algodir) -I$(utildir)
 
 # IBM compiler for AMOS
@@ -28,9 +27,6 @@ graingrowth.out: graingrowth.cpp
 
 parallel: graingrowth.cpp
 	$(pcompiler) $(flags) -include mpi.h $< -o parallel_GG.out -lz
-
-ctcms: graingrowth.cpp
-	$(ccompiler) $(flags) -include mpi.h $< -o ctcms_GG.out -lz
 
 bgq: graingrowth.cpp
 	$(qcompiler) -DBGQ $(qflags) $< -o q_GG.out -lz

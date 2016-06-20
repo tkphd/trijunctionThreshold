@@ -16,15 +16,17 @@
 #include<mpi.h>
 #endif
 #include"MMSP.hpp"
-#include"tricrystal.hpp"
+#include"graingrowth.hpp"
 
-bool isLittleEndian() {
+bool isLittleEndian()
+{
 	short int number = 0x1;
-	char *numPtr = (char*)&number;
+	char* numPtr = (char*)&number;
 	return (numPtr[0] == 1);
 }
 
-namespace MMSP {
+namespace MMSP
+{
 
 void generate(int dim, char* filename)
 {
@@ -35,7 +37,7 @@ void generate(int dim, char* filename)
 	if (rank==0) {
 		std::ofstream vfile("v.log",std::ofstream::out);
 		vfile.close();
-    }
+	}
 
 
 	if (dim == 2)	{
@@ -96,10 +98,10 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 {
 	int rank=0;
 	#ifdef MPI_VERSION
- 	rank=MPI::COMM_WORLD.Get_rank();
+	rank=MPI::COMM_WORLD.Get_rank();
 	#endif
 	const phi_type dt = 0.01;
-	const phi_type width = 10.0;
+	const phi_type width = 17.0;
 	const phi_type epsilon = 1.0e-8;
 
 	std::ofstream vfile;
@@ -131,12 +133,12 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			sparse<int> s;
 			for (int j = 0; j < dim; j++)
 				for (int k = -1; k <= 1; k++) {
-				  x[j] += k;
-				  for (int h = 0; h < length(oldGrid(x)); h++) {
-				    int pindex = index(oldGrid(x), h);
-				    set(s, pindex) = 1;
-				  }
-				  x[j] -= k;
+					x[j] += k;
+					for (int h = 0; h < length(oldGrid(x)); h++) {
+						int pindex = index(oldGrid(x), h);
+						set(s, pindex) = 1;
+					}
+					x[j] -= k;
 				}
 			phi_type S = phi_type(length(s));
 
@@ -150,16 +152,16 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 				// compute variational derivatives
 				sparse<phi_type> dFdp;
 				for (int h = 0; h < length(s); h++) {
-				  int hindex = index(s, h);
-				  for (int j = h + 1; j < length(s); j++) {
-				    int jindex = index(s, j);
-				    phi_type gamma = energy(hindex, jindex);
-				    phi_type eps = 4.0 / acos(-1.0) * sqrt(0.5 * gamma * width);
-				    phi_type w = 4.0 * gamma / width;
-				    // Update dFdp_h and dFdp_j, so the inner loop can be over j>h instead of j≠h
-				    set(dFdp, hindex) += 0.5 * eps * eps * lap[jindex] + w * oldGrid(i)[jindex];
-				    set(dFdp, jindex) += 0.5 * eps * eps * lap[hindex] + w * oldGrid(i)[hindex];
-				  }
+					int hindex = index(s, h);
+					for (int j = h + 1; j < length(s); j++) {
+						int jindex = index(s, j);
+						phi_type gamma = energy(hindex, jindex);
+						phi_type eps = 4.0 / acos(-1.0) * sqrt(0.5 * gamma * width);
+						phi_type w = 4.0 * gamma / width;
+						// Update dFdp_h and dFdp_j, so the inner loop can be over j>h instead of j≠h
+						set(dFdp, hindex) += 0.5 * eps * eps * lap[jindex] + w * oldGrid(i)[jindex];
+						set(dFdp, jindex) += 0.5 * eps * eps * lap[hindex] + w * oldGrid(i)[hindex];
+					}
 				}
 
 				// compute time derivatives
@@ -171,26 +173,26 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 						phi_type mu = mobility(hindex, jindex);
 						set(dpdt, hindex) -= mu * (dFdp[hindex] - dFdp[jindex]);
 						set(dpdt, jindex) -= mu * (dFdp[jindex] - dFdp[hindex]);
-				  }
+					}
 				}
 
 				// compute update values
 				phi_type sum = 0.0;
 				for (int h = 0; h < length(s); h++) {
-				  int pindex = index(s, h);
-				  phi_type value = oldGrid(i)[pindex] + dt * (2.0 / S) * dpdt[pindex]; // Extraneous factor of 2?
-				  if (value > 1.0) value = 1.0;
-				  if (value < 0.0) value = 0.0;
-				  if (value > epsilon) set(newGrid(i), pindex) = value;
-				  sum += newGrid(i)[pindex];
+					int pindex = index(s, h);
+					phi_type value = oldGrid(i)[pindex] + dt * (2.0 / S) * dpdt[pindex]; // Extraneous factor of 2?
+					if (value > 1.0) value = 1.0;
+					if (value < 0.0) value = 0.0;
+					if (value > epsilon) set(newGrid(i), pindex) = value;
+					sum += newGrid(i)[pindex];
 				}
 
 				// project onto Gibbs simplex (enforce Σφ=1)
 				phi_type rsum = 0.0;
 				if (fabs(sum) > 0.0) rsum = 1.0 / sum;
 				for (int h = 0; h < length(newGrid(i)); h++) {
-				  int pindex = index(newGrid(i), h);
-				  set(newGrid(i), pindex) *= rsum;
+					int pindex = index(newGrid(i), h);
+					set(newGrid(i), pindex) *= rsum;
 				}
 			}
 
@@ -258,7 +260,8 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 		vfile.close();
 }
 
-template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s) {
+template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s)
+{
 	o<<"    Index  Value\n";
 	for (int i=0; i<length(s); ++i) {
 		int pindex = index(s, i);

@@ -7,9 +7,8 @@ incdir = ../../mmsp/include
 
 # compilers/flags
 compiler = g++ -O3 -Wall
-pcompiler = mpic++ -O3 -Wall
-ccompiler = /usr/mpi/gcc/openmpi-1.8.4rc1/bin/mpic++ -O3 -Wall
-flags = -I$(incdir)
+pcompiler = /usr/bin/mpic++.openmpi -O3 -Wall
+flags = -I../ -I$(incdir)
 
 # IBM compiler for AMOS
 BG_XL = /bgsys/drivers/ppcfloor/comm/xl
@@ -27,11 +26,8 @@ tricrystal.out: tricrystal.cpp
 parallel: tricrystal.cpp
 	$(pcompiler) $(flags) -include mpi.h $< -o parallel_GG.out -lz
 
-ctcms: tricrystal.cpp
-	$(ccompiler) $(flags) -include mpi.h $< -o ctcms_GG.out -lz
-
 bgq: tricrystal.cpp
 	$(qcompiler) -DBGQ $(qflags) $< -o q_GG.out -lz
 
 clean:
-	rm -rf tricrystal.out parallel_GG.out q_GG.out ctcms_GG.out fnbnd_GG.out
+	rm -rf tricrystal.out parallel_GG.out q_GG.out

@@ -41,6 +41,16 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
                                                     const std::set<double>& levelset, const int& lvlfield, const double& contol, const std::set<int>& fieldset,
                                                     const unsigned int& bufsize, unsigned char* buffer);
 
+// enumerate modes to avoid confusion
+enum {
+	Magnitude = 1,
+	InclField = 2,
+	ExclField = 3,
+	Isolines  = 4,
+	Mobility  = 5,
+	CurveFit  = 6
+};
+
 int main(int argc, char* argv[])
 {
 	// command line error check
@@ -87,6 +97,8 @@ int main(int argc, char* argv[])
 		          << "             writes magnitude of infile.dat values, except fields 1,2,3,to infile.png, bounded on [0,1].\n";
 		std::cout << "          " << argv[0] << " --contour=0,0.25,0.50,0.75 infile.dat\n"
 		          << "             makes black pixels where field 0 equals 0.25,0.50,0.75. Use with any other flag.\n";
+		std::cout << "          " << argv[0] << " --contour=-1,0.25,0.50,0.75 infile.dat\n"
+		          << "             makes black pixels where magnitude equals 0.25,0.50,0.75, ignoring the field index.\n";
 		std::cout << "          " << argv[0] << " --coninv --contour=0,0.25,0.50,0.75 infile.dat\n"
 		          << "             makes white pixels where field 0 equals 0.25,0.50,0.75. Use with any other flag.\n";
 		std::cout << "          " << argv[0] << " --invert infile.dat\n"
@@ -113,10 +125,11 @@ int main(int argc, char* argv[])
 	for (int i=1; i<argc; i++) {
 		std::string flag(argv[i]);
 		if (flag == "--mag") {
-			mode=std::max(1,mode);
+			mode=std::max(int(Magnitude),mode);
 		} else if (flag == "--invert") {
 			invert=true;
 		} else if (flag.substr(0,6) == "--zoom") {
+			// Interpolate grayscale between data minimum and maximum, instead of [0,1]
 			if (flag.length()==6 || flag[6]!='=') {
 				zoomin = std::sqrt(std::numeric_limits<double>::max());
 				zoomax = -zoomin;
@@ -133,6 +146,7 @@ int main(int argc, char* argv[])
 				delete [] cstr;
 			}
 		} else if (flag.substr(0,7) == "--slice") {
+			// Create image from 2D slice of 3D dataset
 			if (flag.length()==7 || flag[7]!='=') {
 				std::cerr<<"Error: expected --slice=X[|Y|Z][,n].\n"<<std::endl;
 				std::exit(-1);
@@ -160,8 +174,10 @@ int main(int argc, char* argv[])
 			else
 				std::cout<<"Slicing through the midpoint of "<<flag[8]<<" axis."<<std::endl;
 		} else if (flag.substr(0,8) == "--coninv") {
+			// Overlay white contours instead of black
 			coninv = true;
 		} else if (flag.substr(0,8) == "--contol") {
+			// Set tolerance or contour line width
 			if (flag.length()==8 || flag[8]!='=') {
 				std::cerr<<"Error: expected --contol=a\n"<<std::endl;
 				std::exit(-1);
@@ -175,8 +191,9 @@ int main(int argc, char* argv[])
 			assert(ptr==NULL);
 			delete [] cstr;
 		} else if (flag.substr(0,9) == "--contour") {
+			// Overlay contours of specified field at specified value(s)
 			if (flag.length()==9 || flag[9]!='=') {
-				std::cerr<<"Error: expected --contour=n,a[,b,c,...]\n"<<std::endl;
+				std::cerr<<"Error: expected "<<flag<<"=field,a[,b,...]\n"<<std::endl;
 				std::exit(-1);
 			}
 			std::string val = flag.substr(10,255);
@@ -190,16 +207,17 @@ int main(int argc, char* argv[])
 				ptr = strtok(NULL,",");
 			}
 			delete [] cstr;
-			if (lvlfield==-1) {
+			if (lvlfield<-1) {
 				std::cerr<<"Error: field "<<lvlfield<<" invalid.\n"<<std::endl;
 				std::exit(-1);
 			}
 		} else if (flag.substr(0,7) == "--field") {
+			// Render only the specified field(s)
 			if (flag[7]!='=') {
 				std::cerr<<"Error: expected "<<flag<<"=n[,p,q,...]\n"<<std::endl;
 				std::exit(-1);
 			}
-			mode=std::max(2,mode);
+			mode=std::max(int(InclField),mode);
  			std::string val = flag.substr(8,255);
 			char* cstr = new char [val.length()+1];
 			std::strcpy(cstr, val.c_str());
@@ -210,11 +228,12 @@ int main(int argc, char* argv[])
 			}
 			delete [] cstr;
 		} else if (flag.substr(0,9) == "--exclude") {
+			// Render everything but the specified field(s)
 			if (flag.length()==9 || flag[9]!='=') {
 				std::cerr<<"Error: expected --exclude=n[,p,q,...]\n"<<std::endl;
 				std::exit(-1);
 			}
-			mode=std::max(3,mode);
+			mode=std::max(int(ExclField),mode);
 			std::string val = flag.substr(10,255);
 			char* cstr = new char [val.length()+1];
 			std::strcpy(cstr, val.c_str());
@@ -225,12 +244,16 @@ int main(int argc, char* argv[])
 			}
 			delete [] cstr;
 		} else if (flag.substr(0,5) == "--fit") {
-			mode=std::max(4,mode);
+			// Fit a tricrystal grain boundary profile to the analytical expression
+			mode=std::max(int(CurveFit),mode);
 		} else if (flag.substr(0,5) == "--mob") {
-			mode=std::max(5,mode);
+			// Plot mobility instead of microstructure
+			mode=std::max(int(Mobility),mode);
 		} else if (flag.find(".png") != std::string::npos) {
+			// if a PNG filename is provided, use it as the image destination
 			pngindex = i;
 		} else {
+			// MMSP data input file
 			datindex = i;
 		}
 	}
@@ -879,7 +902,7 @@ template <int dim, typename T> void convert_scalars(const MMSP::grid<dim,T>& GRI
 
 	for (int n=0; n<MMSP::nodes(GRID); n++) {
 		T val = GRID(n);
-		if (mode==1) // mag
+		if (mode==Magnitude) // mag
 			val = std::abs(val);
 		if (val>max)
 			max=val;
@@ -894,11 +917,11 @@ template <int dim, typename T> void convert_scalars(const MMSP::grid<dim,T>& GRI
 		MMSP::vector<int> x(1,0);
 		for (x[0] = MMSP::g0(GRID,0); x[0] < MMSP::g1(GRID,0); x[0]++) {
 			T val = GRID(x);
-			if (mode==1) //mag
+			if (mode==Magnitude) //mag
 				val = std::abs(val);
 			assert(n<bufsize);
 			buffer[n] = 255*((val-min)/(max-min));
-			if (mode==4) //contour
+			if (levelset.size()>0) //contour
 				for (std::set<double>::iterator it=levelset.begin(); it!=levelset.end(); it++)
 					if (std::fabs(val-*it)/std::fabs(*it)<contol)
 						buffer[n] = 255-buffer[n];
@@ -910,11 +933,11 @@ template <int dim, typename T> void convert_scalars(const MMSP::grid<dim,T>& GRI
 		for (x[1] = MMSP::g1(GRID,1)-1; x[1] >= MMSP::g0(GRID,1); x[1]--)
 			for (x[0] = MMSP::g0(GRID,0); x[0] < MMSP::g1(GRID,0); x[0]++) {
 				T val = GRID(x);
-				if (mode==1) //mag
+				if (mode==Magnitude) //mag
 					val = std::abs(val);
 				assert(n<bufsize);
 				buffer[n] = 255*((val-min)/(max-min));
-				if (mode==4) //contour
+				if (levelset.size()>0) //contour
 					for (std::set<double>::iterator it=levelset.begin(); it!=levelset.end(); it++)
 						if (std::fabs(val-*it)/std::fabs(*it)<contol)
 							buffer[n] = 255-buffer[n];
@@ -929,7 +952,7 @@ template <int dim, typename T> void convert_scalars(const MMSP::grid<dim,T>& GRI
 					if (x[sliceaxis]!=slicelevel) // clumsy, but effective
 						continue;
 					T val = GRID(x);
-					if (mode==1) //mag
+					if (mode==Magnitude) //mag
 						val = std::abs(val);
 					assert(n<bufsize);
 					buffer[n] = 255*((val-min)/(max-min));
@@ -949,7 +972,7 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 {
 	double min=zoomin;
 	double max=zoomax;
-	int included = (mode==2) ? fieldset.size() : MMSP::fields(GRID)-fieldset.size();
+	int included = (mode==InclField) ? fieldset.size() : MMSP::fields(GRID)-fieldset.size();
 
 	for (int n=0; n<MMSP::nodes(GRID); n++) {
 		double sum=0.0;
@@ -959,16 +982,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 					sum += pow(GRID(n)[i],2.0);
 				else
 					sum = GRID(n)[i];
-		} else if (mode==1) { //  --mag
+		} else if (mode==Magnitude) { //  --mag
 			for (int i=0; i<MMSP::fields(GRID); i++)
 				sum += pow(GRID(n)[i],2.0);
-		} else if (mode==2) { //  --field
+		} else if (mode==InclField) { //  --field
 			if (included>1)
 				for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++)
 					sum += pow(GRID(n)[*it],2.0);
 			else
 				sum = GRID(n)[*fieldset.begin()];
-		} else if (mode==3) { //  --exclude
+		} else if (mode==ExclField) { //  --exclude
 			for (int i=0; i<MMSP::fields(GRID); i++) {
 				std::set<int>::iterator it=fieldset.find(i);
 				if (it == fieldset.end()) {
@@ -979,7 +1002,7 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 				}
 			}
 		}
-		if (mode==1 || included!=1)
+		if (mode==Magnitude || included!=1)
 			sum = std::sqrt(sum);
 		if (sum>max)
 			max=sum;
@@ -1001,16 +1024,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 					else
 						sum = GRID(x)[i];
 				}
-			} else if (mode==1) { //  --mag
+			} else if (mode==Magnitude) { //  --mag
 				for (int i=0; i<MMSP::fields(GRID); i++)
 					sum += pow(GRID(x)[i],2.0);
-			} else if (mode==2) { //  --field
+			} else if (mode==InclField) { //  --field
 				if (fieldset.size()==1)
 					sum = GRID(x)[*fieldset.begin()];
 				else
 					for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++)
 						sum += pow(GRID(x)[*it],2.0);
-			} else if (mode==3) { //  --exclude
+			} else if (mode==ExclField) { //  --exclude
 				for (int i=0; i<MMSP::fields(GRID); i++) {
 					std::set<int>::iterator it=fieldset.find(i);
 					if (it == fieldset.end()) {
@@ -1021,14 +1044,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 					}
 				}
 			}
-			if (mode==1 || included!=1)
+			if (mode==Magnitude || included!=1)
 				sum = std::sqrt(sum);
 			assert(n<bufsize);
 			buffer[n] = 255*((sum-min)/(max-min));
-			if (levelset.size()>0) // --contour
+			if (levelset.size()>0) {// --contour
+				double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 				for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-					if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+					if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 						buffer[n] = coninv ? 255 : 0;
+			}
 			n++;
 		}
 	} else if (dim==2) {
@@ -1044,17 +1069,17 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 						else
 							sum = GRID(x)[i];
 					}
-				} else if (mode==1) { //  --mag
+				} else if (mode==Magnitude) { //  --mag
 					for (int i=0; i<MMSP::fields(GRID); i++)
 						sum += pow(GRID(x)[i],2.0);
-				} else if (mode==2) { //  --field
+				} else if (mode==InclField) { //  --field
 					if (fieldset.size()==1) {
 						sum = GRID(x)[*fieldset.begin()];
 					} else {
 						for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++)
 							sum += pow(GRID(x)[*it],2.0);
 					}
-				} else if (mode==3) { //  --exclude
+				} else if (mode==ExclField) { //  --exclude
 					for (int i=0; i<MMSP::fields(GRID); i++) {
 						std::set<int>::iterator it=fieldset.find(i);
 						if (it == fieldset.end()) {
@@ -1065,14 +1090,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 						}
 					}
 				}
-				if (mode==1 || included!=1)
+				if (mode==Magnitude || included!=1)
 					sum = std::sqrt(sum);
 				assert(n<bufsize);
 				buffer[n] = 255*((sum-min)/(max-min));
-				if (levelset.size()>0) // --contour
+				if (levelset.size()>0) {// --contour
+					double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 					for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-						if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+						if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 							buffer[n] = coninv ? 255 : 0;
+				}
 				n++;
 			}
 	} else if (dim==3) {
@@ -1091,16 +1118,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 							else
 								sum = GRID(x)[i];
 						}
-					} else if (mode==1) { //  --mag
+					} else if (mode==Magnitude) { //  --mag
 						for (int i=0; i<MMSP::fields(GRID); i++)
 							sum += pow(GRID(x)[i],2.0);
-					} else if (mode==2) { //  --field
+					} else if (mode==InclField) { //  --field
 						if (fieldset.size()==1)
 							sum = GRID(x)[*fieldset.begin()];
 						else
 							for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++)
 								sum += pow(GRID(x)[*it],2.0);
-					} else if (mode==3) { //  --exclude
+					} else if (mode==ExclField) { //  --exclude
 						for (int i=0; i<MMSP::fields(GRID); i++) {
 							std::set<int>::iterator it=fieldset.find(i);
 							if (it == fieldset.end()) {
@@ -1111,14 +1138,16 @@ template <int dim, typename T> void convert_vectors(const MMSP::grid<dim,MMSP::v
 							}
 						}
 					}
-					if (mode==1 || included!=1)
+					if (mode==Magnitude || included!=1)
 						sum = std::sqrt(sum);
 					assert(n<bufsize);
 					buffer[n] = 255*((sum-min)/(max-min));
-					if (levelset.size()>0) // --contour
+					if (levelset.size()>0) {// --contour
+						double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 						for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-							if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+							if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 								buffer[n] = coninv ? 255 : 0;
+					}
 					n++;
 				}
 	}
@@ -1142,24 +1171,24 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 
 	for (int n=0; n<MMSP::nodes(GRID); n++) {
 		double sum=0.0;
-		if (mode==2) { //  --field
+		if (mode==InclField) { //  --field
 			for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++) {
 				if (included>1)
 					sum += pow(GRID(n)[*it],2.0);
 				else
 					sum = GRID(n)[*it];
 			}
-		} else if (mode==3) { //  --exclude
+		} else if (mode==ExclField) { //  --exclude
 			for (int h=0; h<GRID(n).length(); h++) {
 				int i=GRID(n).index(i);
 				std::set<int>::iterator it=fieldset.find(i);
 				if (it == fieldset.end())
 					sum += pow(GRID(n).value(h),2.0);
 			}
-		} else if (mode==4) { //  --fit
+		} else if (mode==CurveFit) { //  --fit
 			for (int h=0; h<GRID(n).length(); h++)
 				sum += pow(GRID(n).value(h) - 0.5,2.0);
-		} else if (mode==5) {
+		} else if (mode==Mobility) {
 			sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(n).getMagPhi());
 		} else { //         --mag or default selection
 			for (int h=0; h<GRID(n).length(); h++)
@@ -1170,7 +1199,7 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 			minPhi = GRID(tj).getMagPhi();
 		}
 
-		if (included!=1 && mode!=5)
+		if (included!=1 && mode!=Mobility)
 			sum = std::sqrt(sum);
 		if (sum>max)
 			max=sum;
@@ -1185,35 +1214,37 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 		MMSP::vector<int> x(1,0);
 		for (x[0] = MMSP::g0(GRID,0); x[0] < MMSP::g1(GRID,0); x[0]++) {
 			double sum=0.0;
-			if (mode==2) { //  --field
+			if (mode==InclField) { //  --field
 				for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++) {
 					if (included>1)
 						sum += pow(GRID(x)[*it],2.0);
 					else
 						sum = GRID(x)[*it];
 				}
-			} else if (mode==3) { //  --exclude
+			} else if (mode==ExclField) { //  --exclude
 				for (int h=0; h<GRID(x).length(); h++) {
 					int i=GRID(x).index(i);
 					std::set<int>::iterator it=fieldset.find(i);
 					if (it == fieldset.end())
 						sum += pow(GRID(x).value(h),2.0);
 				}
-			} else if (mode==5) {
+			} else if (mode==Mobility) {
 				sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 			} else { //          --mag or default
 				for (int h=0; h<GRID(x).length(); h++)
 					sum += pow(GRID(x).value(h),2.0);
 			}
 
-			if ((mode!=2 && mode!=5) || included!=1)
+			if ((mode!=InclField && mode!=Mobility) || included!=1)
 				sum = std::sqrt(sum);
 			assert(n<bufsize);
 			buffer[n] = 255*((sum-min)/(max-min));
-			if (levelset.size()>0) // --contour
+			if (levelset.size()>0) {// --contour
+				double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 				for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-					if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+					if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 						buffer[n] = coninv ? 255 : 0;
+			}
 			n++;
 		}
 	} else if (dim==2) {
@@ -1222,39 +1253,41 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 		for (x[1] = MMSP::g1(GRID,1)-1; x[1] >= MMSP::g0(GRID,1); x[1]--) {
 			for (x[0] = MMSP::g0(GRID,0); x[0] < MMSP::g1(GRID,0); x[0]++) {
 				double sum=0.0;
-				if (mode==2) { //  --field
+				if (mode==InclField) { //  --field
 					for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++) {
 						if (included>1)
 							sum += pow(GRID(x)[*it],2.0);
 						else
 							sum = GRID(x)[*it];
 					}
-				} else if (mode==3) { //  --exclude
+				} else if (mode==ExclField) { //  --exclude
 					for (int h=0; h<GRID(x).length(); h++) {
 						int i=GRID(x).index(i);
 						std::set<int>::iterator it=fieldset.find(i);
 						if (it == fieldset.end())
 							sum += pow(GRID(x).value(h),2.0);
 					}
-				} else if (mode==5) {
+				} else if (mode==Mobility) {
 					sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 				} else { //          --mag or default
 					for (int h=0; h<GRID(x).length(); h++)
 						sum += pow(GRID(x).value(h),2.0);
 				}
-				if ((mode!=2 && mode!=5) || included!=1)
+				if ((mode!=InclField && mode!=Mobility) || included!=1)
 					sum = std::sqrt(sum);
 				assert(n<bufsize);
 				buffer[n] = 255*((sum-min)/(max-min));
-				if (levelset.size()>0) // --contour
+				if (levelset.size()>0) {// --contour
+					double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 					for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-						if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+						if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 							buffer[n] = coninv ? 255 : 0;
+				}
 				n++;
 			}
 		}
 
-		if (mode==4) {
+		if (mode==CurveFit) {
 			// Compute grain boundary profile
 			x = tj;
 			//while (GRID(x).getMagPhi() < 0.9)
@@ -1304,38 +1337,40 @@ template <int dim, typename T> void convert_sparses(const MMSP::grid<dim,MMSP::s
 					if (x[sliceaxis]!=slicelevel) // clumsy, but effective
 						continue;
 					double sum=0.0;
-					if (mode==2) { //  --field
+					if (mode==InclField) { //  --field
 						for (std::set<int>::iterator it=fieldset.begin(); it!=fieldset.end(); it++) {
 							if (included>1)
 								sum += pow(GRID(x)[*it],2.0);
 							else
 								sum = GRID(x)[*it];
 						}
-					} else if (mode==3) { //  --exclude
+					} else if (mode==ExclField) { //  --exclude
 						for (int h=0; h<GRID(x).length(); h++) {
 							int i=GRID(x).index(i);
 							std::set<int>::iterator it=fieldset.find(i);
 							if (it == fieldset.end())
 								sum += pow(GRID(x).value(h),2.0);
 						}
-					} else if (mode==4) { //  --fit
+					} else if (mode==CurveFit) { //  --fit
 						for (int h=0; h<GRID(x).length(); h++)
 							sum += pow(GRID(x).value(h) - 0.5,2.0);
-					} else if (mode==5) {
+					} else if (mode==Mobility) {
 						sum = mobility(mu_lo, mu_hi, mu_x, mu_s, GRID(x).getMagPhi());
 					} else { //          --mag
 						for (int h=0; h<GRID(x).length(); h++)
 							sum += pow(GRID(x).value(h),2.0);
 					}
 
-					if ((mode!=2 && mode!=5) || included!=1)
+					if ((mode!=InclField && mode!=Mobility) || included!=1)
 						sum = std::sqrt(sum);
 					assert(n<bufsize);
 					buffer[n] = 255*((sum-min)/(max-min));
-					if (levelset.size()>0) // --contour
+					if (levelset.size()>0) {// --contour
+						double value = (lvlfield>-1) ? GRID(x)[lvlfield] : sum;
 						for (std::set<double>::iterator itl=levelset.begin(); itl!=levelset.end(); itl++)
-							if (std::fabs(GRID(x)[lvlfield]-*itl)/std::fabs(*itl)<contol)
+							if (std::fabs(value - *itl)/std::fabs(*itl)<contol)
 								buffer[n] = coninv ? 255 : 0;
+					}
 					n++;
 				}
 	}

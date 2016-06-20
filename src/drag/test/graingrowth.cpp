@@ -31,22 +31,22 @@ namespace MMSP
 
 void generate(int dim, char* filename)
 {
-#if (!defined MPI_VERSION || MPI_VERSION<2) && (defined BGQ)
+	#if (!defined MPI_VERSION || MPI_VERSION<2) && (defined BGQ)
 	std::cerr<<"Error: MPI-2 is required for BG/Q."<<std::endl;
 	exit(1);
-#endif
+	#endif
 	static unsigned long tstart;
 
 	int rank=0;
-#ifdef MPI_VERSION
+	#ifdef MPI_VERSION
 	rank = MPI::COMM_WORLD.Get_rank();
 	int np = MPI::COMM_WORLD.Get_size();
-#endif
-#ifdef DEBUG
+	#endif
+	#ifdef DEBUG
 	if (rank==0) {
 		if (!isLittleEndian()) std::cout<<"Byte order is big-endian."<<std::endl;
 	}
-#endif
+	#endif
 	if (dim == 2)	{
 		const int edge = 1024;
 		int number_of_fields = 80896;
@@ -54,24 +54,24 @@ void generate(int dim, char* filename)
 		if (rank==0) std::cout<<"Grid origin: ("<<g0(initGrid,0)<<','<<g0(initGrid,1)<<"),"
 			                      <<" dimensions: "<<g1(initGrid,0)-g0(initGrid,0)<<" × "<<g1(initGrid,1)-g0(initGrid,1)
 			                      <<" with "<<number_of_fields<<" seeds"<<std::flush;
-#ifdef MPI_VERSION
+		#ifdef MPI_VERSION
 		number_of_fields /= np;
 		if (rank==0) std::cout<<", "<<number_of_fields<<" per rank"<<std::flush;
 		if (rank==0 && number_of_fields % np != 0)
 			std::cerr<<"\nWarning: Tessellation may hang with uneven distribution of seeds per thread."<<std::endl;
-#endif
+		#endif
 		if (rank==0) std::cout<<"."<<std::endl;
 
-#if (!defined MPI_VERSION) && (defined BGQ)
+		#if (!defined MPI_VERSION) && (defined BGQ)
 		std::cerr<<"Error: Blue Gene requires MPI."<<std::endl;
 		std::exit(-1);
-#endif
+		#endif
 		tstart = time(NULL);
 		tessellate<2,phi_type>(initGrid, number_of_fields);
 		if (rank==0) std::cout<<"Tessellation complete ("<<time(NULL)-tstart<<" sec)."<<std::endl;
-#ifdef MPI_VERSION
+		#ifdef MPI_VERSION
 		MPI::COMM_WORLD.Barrier();
-#endif
+		#endif
 		tstart=time(NULL);
 		output(initGrid, filename);
 		if (rank==0) std::cout<<"Voronoi tessellation written to "<<filename<<" ("<<time(NULL)-tstart<<" sec)."<<std::endl;
@@ -81,16 +81,16 @@ void generate(int dim, char* filename)
 
 template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 {
-#if (!defined MPI_VERSION) && (defined BGQ)
+	#if (!defined MPI_VERSION) && (defined BGQ)
 	std::cerr<<"Error: Blue Gene requires MPI."<<std::endl;
 	exit(-1);
-#endif
+	#endif
 	int rank=0;
-#ifdef MPI_VERSION
+	#ifdef MPI_VERSION
 	rank = MPI::COMM_WORLD.Get_rank();
-#endif
+	#endif
 	const phi_type dt = 0.01;
-	const phi_type width = 10.0;
+	const phi_type width = 17.0;
 	const phi_type epsilon = 1.0e-8;
 	const double mu_hi = 1.00;
 	const double mu_lo = 0.01;
