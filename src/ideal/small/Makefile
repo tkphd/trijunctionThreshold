@@ -9,7 +9,7 @@ algodir = ../../mmsp/algorithms
 
 # compilers/flags
 compiler = g++ -O3 -Wall
-pcompiler = mpic++ -O3 -Wall
+pcompiler = /usr/bin/mpic++.openmpi -O3 -Wall
 flags = -I../ -I$(incdir) -I$(algodir) -I$(utildir)
 
 # IBM compiler for AMOS
