@@ -194,103 +194,147 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
                        const std::vector<MMSP::vector<int> >& global_vertices,
                        MMSP::grid<dim,double>& cost)
 {
-	const T f=2.0;
-	const T fmin=0.0;
-	T min=std::numeric_limits<T>::max();
-	T max=std::numeric_limits<T>::min();
+	const double fmax=2.0;
+	const double fmin=0.0;
+	double min=std::numeric_limits<double>::max();
+	double max=std::numeric_limits<double>::min();
 	if (dim==2) {
 		// Cost of moving through the grain boundary equals the curvature of |phi| at
 		// the point. Mean curvature 2H = -div.normal=-div.(grad |phi|/|grad|phi||).
-		MMSP::grid<2,double> A(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1));
-		MMSP::grid<2,double> B(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1));
-		MMSP::vector<int> x;
-		double curvature,mag;
-		MMSP::vector<double> grdA;
-		MMSP::vector<double> grdB;
-		int phases;
+		// If 2H>0, take cost as |phi| instead.
 
-		#pragma omp parallel for private(x) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(grid); i++) {
-			x=MMSP::position(grid,i);
-			A(x) = grid(x).getMagPhi();
-		}
-		#pragma omp parallel for private(x,grdA,mag) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(A); i++) {
-			x=MMSP::position(A,i);
-			grdA = MMSP::gradient(A,x);
-			mag=sqrt( A(x)*A(x) );
-			B(x) = 1.0/mag;
-		}
-		#pragma omp parallel for private(x,grdA,grdB,curvature) shared(min,max) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(A); i++) {
-			x=MMSP::position(A,i);
-			grdA = MMSP::gradient(A,x);
-			grdB = MMSP::gradient(B,x);
-			curvature = -1.0*B(x)*MMSP::laplacian(A,x) - grdA*grdB; // Full curvature expression
-			cost(x) = curvature;
+		MMSP::grid<2,double> magnitude(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1));
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(grid); i++)
+			magnitude(i) = grid(i).getMagPhi();
+
+		#pragma omp parallel
+		{
+			double myMin = min;
+			double myMax = max;
+			#pragma omp for nowait
+			for (int i=0; i<MMSP::nodes(magnitude); i++) {
+				MMSP::vector<int> x = MMSP::position(magnitude,i);
+				MMSP::vector<T> grad (dim,0.0);
+				double H = 0.0;
+				for (int d=0; d<dim; d++) {
+					// Central second-order difference
+					// Get low values
+					x[d] -= 1;
+					const T& pl = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Ml = 1.0 / std::sqrt(grad*grad);
+
+					// Get high values
+					x[d] += 2;
+					const T& ph = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Mh = 1.0 / std::sqrt(grad*grad);
+
+					// Get central values
+					x[d] -= 1;
+					const T& pc = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Mc = 1.0 / std::sqrt(grad*grad);
+
+					// Put 'em all together (note -=, since it's the negative curvature)
+					double weight = 1.0/pow(dx(grid,d), 2.0);
+					H -= 0.5*weight*( (Mh+Mc)*(ph-pc) - (Mc+Ml)*(pc-pl) );
+				}
+				H = (H<0.0) ? H : magnitude(i);
+				cost(i) = H;
+				if (H < myMin)
+					myMin = H;
+				else if (H > myMax)
+					myMax = H;
+			}
+
 			#pragma omp critical
 			{
-				if (curvature<min) min=curvature;
-				else if (curvature>max) max=curvature;
+				if (myMin < min)
+					min = myMin;
+				else if (myMax > max)
+					max = myMax;
 			}
 		}
-		#pragma omp parallel for private(x,phases,curvature) shared(min,max) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(grid); i++) {
-			x=MMSP::position(grid,i);
-			phases = grid(x).length();
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(cost); i++) {
+			int phases = grid(i).length();
 			if (phases<dim)
-				cost(x)=sqrt(std::numeric_limits<double>::max());//f;
-			else {
-				curvature=cost(x);
-				cost(x)=fmin+(f-fmin)*(curvature-min)/(max-min); // rescale on [fmin,f]
-			}
+				cost(i)=sqrt(std::numeric_limits<double>::max()); // infinite cost
+			else
+				cost(i)=fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
 		}
 	} else if (dim==3) {
 		// Cost of moving through the grain boundary equals the curvature of |phi| at
-		// the point. kappa = div.grad(normal), with normal=(grad |phi|)/|grad|phi||.
-		MMSP::grid<3,double> A(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1),MMSP::g0(grid,2),MMSP::g1(grid,2));
-		MMSP::grid<3,double> B(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1),MMSP::g0(grid,2),MMSP::g1(grid,2));
-		MMSP::vector<int> x;
-		double curvature,mag;
-		MMSP::vector<double> grdA;
-		MMSP::vector<double> grdB;
-		int phases;
+		// the point. Mean curvature 2H = -div.normal=-div.(grad |phi|/|grad|phi||).
+		// If 2H>0, take cost as |phi| instead.
 
-		#pragma omp parallel for private(x) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(grid); i++) {
-			x=MMSP::position(grid,i);
-			A(x) = grid(x).getMagPhi();
-		}
-		#pragma omp parallel for private(x,grdA,mag) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(A); i++) {
-			x=MMSP::position(A,i);
-			grdA = MMSP::gradient(A,x);
-			mag=sqrt( A(x)*A(x) );
-			B(x) = 1.0/mag;
-		}
-		#pragma omp parallel for private(x,grdA,grdB,curvature) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(A); i++) {
-			x = MMSP::position(A,i);
-			grdA = MMSP::gradient(A,x);
-			grdB = MMSP::gradient(B,x);
-			curvature = -1.0*B(x)*MMSP::laplacian(A,x) - grdA*grdB; // Curvature
-			cost(x) = curvature;
+		MMSP::grid<3,double> magnitude(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1),MMSP::g0(grid,2),MMSP::g1(grid,2));
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(grid); i++)
+			magnitude(i) = grid(i).getMagPhi();
+
+		#pragma omp parallel
+		{
+			double myMin = min;
+			double myMax = max;
+			#pragma omp for nowait
+			for (int i=0; i<MMSP::nodes(magnitude); i++) {
+				MMSP::vector<int> x = MMSP::position(magnitude,i);
+				MMSP::vector<T> grad (dim,0.0);
+				double H = 0.0;
+				for (int d=0; d<dim; d++) {
+					// Central second-order difference
+					// Get low values
+					x[d] -= 1;
+					const T& pl = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Ml = 1.0 / std::sqrt(grad*grad);
+
+					// Get high values
+					x[d] += 2;
+					const T& ph = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Mh = 1.0 / std::sqrt(grad*grad);
+
+					// Get central values
+					x[d] -= 1;
+					const T& pc = magnitude(x);
+					grad = MMSP::gradient(magnitude, x);
+					const T  Mc = 1.0 / std::sqrt(grad*grad);
+
+					// Put 'em all together (note -=, since it's the negative curvature)
+					double weight = 1.0/pow(dx(grid,d), 2.0);
+					H -= 0.5*weight*( (Mh+Mc)*(ph-pc) - (Mc+Ml)*(pc-pl) );
+				}
+				H = (H<0.0) ? H : magnitude(i);
+				cost(i) = H;
+				if (H < myMin)
+					myMin = H;
+				else if (H > myMax)
+					myMax = H;
+			}
+
 			#pragma omp critical
 			{
-				if (curvature<min) min=curvature;
-				else if (curvature>max) max=curvature;
+				if (myMin < min)
+					min = myMin;
+				else if (myMax > max)
+					max = myMax;
 			}
 		}
-		#pragma omp parallel for private(x,phases,curvature) schedule(dynamic)
-		for (int i=0; i<MMSP::nodes(grid); i++) {
-			x=MMSP::position(grid,i);
-			phases = grid(x).length();
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(cost); i++) {
+			int phases = grid(i).length();
 			if (phases<dim)
-				cost(x)=sqrt(std::numeric_limits<double>::max());//f;
-			else {
-				curvature=cost(x);
-				cost(x)=fmin+(f-fmin)*(curvature-min)/(max-min); // rescale on [fmin,f]
-			}
+				cost(i)=sqrt(std::numeric_limits<double>::max()); // infinite cost
+			else
+				cost(i)=fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
 		}
 	}
 } // determine_weights
