@@ -23,6 +23,7 @@
 *.png
 *.pvd
 *.sh
+*.sh.*
 *.vti
 *.xy
 *.xyz

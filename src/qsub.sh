@@ -4,6 +4,17 @@
 SCRIPT=$1
 CORES=64
 
-cd /users/tnk10/research/projects/trijunctionThreshold/dat
+findIdeal=$(echo $SCRIPT | grep -q ideal)
+findDrag=$(echo $SCRIPT | grep -q drag)
+
+cd ../dat
+
+if [[ $findIdeal ]]
+then
+	cd ideal
+elif [[ $findDrag ]]
+then
+	cd drag
+fi
 
 qsub -cwd -m be -M tnk10 -pe nodal $CORES -q rack4,rack5 $SCRIPT
