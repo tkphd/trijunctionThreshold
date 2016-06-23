@@ -452,11 +452,17 @@ void approximate_voronoi(MMSP::grid<dim, sparse<T> >& grid, const std::vector<st
 template<int dim, typename T>
 void tessellate(const std::vector<MMSP::vector<int> >& local_seeds, std::vector<std::vector<MMSP::vector<int> > >& seeds, MMSP::grid<dim, sparse<T> >& grid)
 {
+	int np = 1;
+	#ifdef MPI_VERSION
+	np = MPI::COMM_WORLD.Get_size();
+	#endif
+	std::vector<MMSP::vector<int> > blank;
+	while (int(seeds.size()) < np)
+		seeds.push_back(blank);
 	#ifndef MPI_VERSION
 	seeds[0].insert(seeds[0].end(), local_seeds.begin(), local_seeds.end());
 	#else
 	int rank = MPI::COMM_WORLD.Get_rank();
-	int np = MPI::COMM_WORLD.Get_size();
 	// Exchange seeds between all processors
 	int send_size=3*local_seeds.size(); // number of integers
 	int* send_buffer = new int[send_size]; // number of integers
