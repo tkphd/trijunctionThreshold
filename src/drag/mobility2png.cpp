@@ -376,19 +376,7 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (char_type) {
-			if (dim == 1) {
-				MMSP::grid<1,char> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,char> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,char> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			}
-		}
-		if (unsigned_char_type) {
+		else if (unsigned_char_type) {
 			if (dim == 1) {
 				MMSP::grid<1,unsigned char> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -400,19 +388,19 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (int_type) {
+		else if (char_type) {
 			if (dim == 1) {
-				MMSP::grid<1,int> GRID(argv[datindex]);
+				MMSP::grid<1,char> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,int> GRID(argv[datindex]);
+				MMSP::grid<2,char> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,int> GRID(argv[datindex]);
+				MMSP::grid<3,char> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (unsigned_int_type) {
+		else if (unsigned_int_type) {
 			if (dim == 1) {
 				MMSP::grid<1,unsigned int> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -424,19 +412,19 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (long_type) {
+		else if (int_type) {
 			if (dim == 1) {
-				MMSP::grid<1,long> GRID(argv[datindex]);
+				MMSP::grid<1,int> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,long> GRID(argv[datindex]);
+				MMSP::grid<2,int> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,long> GRID(argv[datindex]);
+				MMSP::grid<3,int> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (unsigned_long_type) {
+		else if (unsigned_long_type) {
 			if (dim == 1) {
 				MMSP::grid<1,unsigned long> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -448,19 +436,19 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (short_type) {
+		else if (long_type) {
 			if (dim == 1) {
-				MMSP::grid<1,short> GRID(argv[datindex]);
+				MMSP::grid<1,long> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,short> GRID(argv[datindex]);
+				MMSP::grid<2,long> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,short> GRID(argv[datindex]);
+				MMSP::grid<3,long> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (unsigned_short_type) {
+		else if (unsigned_short_type) {
 			if (dim == 1) {
 				MMSP::grid<1,unsigned short> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -472,7 +460,19 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (float_type) {
+		else if (short_type) {
+			if (dim == 1) {
+				MMSP::grid<1,short> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,short> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,short> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			}
+		}
+		else if (float_type) {
 			if (dim == 1) {
 				MMSP::grid<1,float> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -484,19 +484,7 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
-		if (double_type) {
-			if (dim == 1) {
-				MMSP::grid<1,double> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,double> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,double> GRID(argv[datindex]);
-				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
-			}
-		}
-		if (long_double_type) {
+		else if (long_double_type) {
 			if (dim == 1) {
 				MMSP::grid<1,long double> GRID(argv[datindex]);
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
@@ -508,8 +496,21 @@ int main(int argc, char* argv[])
 				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
 			}
 		}
+		else if (double_type) {
+			if (dim == 1) {
+				MMSP::grid<1,double> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,double> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,double> GRID(argv[datindex]);
+				convert_scalars(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, theSize, buffer);
+			}
+		}
 		*/
 	}
+
 	else if (vector_type)
 	{
 		/*
@@ -525,19 +526,7 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (char_type) {
-			if (dim == 1) {
-				MMSP::grid<1,MMSP::vector<char> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::vector<char> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::vector<char> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			}
-		}
-		if (unsigned_char_type) {
+		else if (unsigned_char_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<unsigned char> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -549,19 +538,19 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (int_type) {
+		else if (char_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::vector<int> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::vector<char> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::vector<int> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::vector<char> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::vector<int> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::vector<char> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_int_type) {
+		else if (unsigned_int_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<unsigned int> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -573,19 +562,19 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (long_type) {
+		else if (int_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::vector<long> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::vector<int> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::vector<long> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::vector<int> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::vector<long> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::vector<int> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_long_type) {
+		else if (unsigned_long_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<unsigned long> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -597,19 +586,19 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (short_type) {
+		else if (long_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::vector<short> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::vector<long> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::vector<short> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::vector<long> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::vector<short> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::vector<long> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_short_type) {
+		else if (unsigned_short_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<unsigned short> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -621,7 +610,19 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (float_type) {
+		else if (short_type) {
+			if (dim == 1) {
+				MMSP::grid<1,MMSP::vector<short> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,MMSP::vector<short> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,MMSP::vector<short> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			}
+		}
+		else if (float_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<float> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -633,19 +634,7 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (double_type) {
-			if (dim == 1) {
-				MMSP::grid<1,MMSP::vector<double> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::vector<double> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::vector<double> > GRID(argv[datindex]);
-				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			}
-		}
-		if (long_double_type) {
+		else if (long_double_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::vector<long double> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -654,6 +643,18 @@ int main(int argc, char* argv[])
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
 				MMSP::grid<3,MMSP::vector<long double> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			}
+		}
+		else if (double_type) {
+			if (dim == 1) {
+				MMSP::grid<1,MMSP::vector<double> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,MMSP::vector<double> > GRID(argv[datindex]);
+				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,MMSP::vector<double> > GRID(argv[datindex]);
 				convert_vectors(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
@@ -673,19 +674,7 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (char_type) {
-			if (dim == 1) {
-				MMSP::grid<1,MMSP::sparse<char> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::sparse<char> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::sparse<char> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			}
-		}
-		if (unsigned_char_type) {
+		else if (unsigned_char_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<unsigned char> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -697,19 +686,19 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (int_type) {
+		else if (char_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::sparse<int> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::sparse<char> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::sparse<int> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::sparse<char> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::sparse<int> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::sparse<char> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_int_type) {
+		else if (unsigned_int_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<unsigned int> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -721,19 +710,19 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (long_type) {
+		else if (int_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::sparse<long> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::sparse<int> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::sparse<long> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::sparse<int> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::sparse<long> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::sparse<int> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_long_type) {
+		else if (unsigned_long_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<unsigned long> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -745,19 +734,19 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (short_type) {
+		else if (long_type) {
 			if (dim == 1) {
-				MMSP::grid<1,MMSP::sparse<short> > GRID(argv[datindex]);
+				MMSP::grid<1,MMSP::sparse<long> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::sparse<short> > GRID(argv[datindex]);
+				MMSP::grid<2,MMSP::sparse<long> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::sparse<short> > GRID(argv[datindex]);
+				MMSP::grid<3,MMSP::sparse<long> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (unsigned_short_type) {
+		else if (unsigned_short_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<unsigned short> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -769,7 +758,19 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (float_type) {
+		else if (short_type) {
+			if (dim == 1) {
+				MMSP::grid<1,MMSP::sparse<short> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,MMSP::sparse<short> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,MMSP::sparse<short> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			}
+		}
+		else if (float_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<float> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -781,19 +782,7 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
-		if (double_type) {
-			if (dim == 1) {
-				MMSP::grid<1,MMSP::sparse<double> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 2) {
-				MMSP::grid<2,MMSP::sparse<double> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			} else if (dim == 3) {
-				MMSP::grid<3,MMSP::sparse<double> > GRID(argv[datindex]);
-				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
-			}
-		}
-		if (long_double_type) {
+		else if (long_double_type) {
 			if (dim == 1) {
 				MMSP::grid<1,MMSP::sparse<long double> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
@@ -802,6 +791,18 @@ int main(int argc, char* argv[])
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			} else if (dim == 3) {
 				MMSP::grid<3,MMSP::sparse<long double> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			}
+		}
+		else if (double_type) {
+			if (dim == 1) {
+				MMSP::grid<1,MMSP::sparse<double> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 2) {
+				MMSP::grid<2,MMSP::sparse<double> > GRID(argv[datindex]);
+				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
+			} else if (dim == 3) {
+				MMSP::grid<3,MMSP::sparse<double> > GRID(argv[datindex]);
 				convert_sparses(GRID, mode, sliceaxis, slicelevel, zoomin, zoomax, coninv, levelset, lvlfield, contol, fieldset, theSize, buffer);
 			}
 		}
