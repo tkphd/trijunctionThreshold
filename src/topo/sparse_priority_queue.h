@@ -27,8 +27,8 @@ public:
   	}
   	return std::sqrt(std::numeric_limits<double>::max());
   }
-  const int length() const {return distance.length();}
-  const int index(int j) const {return distance.index(j);}
+  int length() const {return distance.length();}
+  int index(int j) const {return distance.index(j);}
   // modifier
   void setPosition(const int d, int i){x[d]=i;}
   void setValue(const int index, double v) {distance.set(index) = v;}
