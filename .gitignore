@@ -37,6 +37,7 @@ src/mmsp/utility/mmsp2topo
 src/mmsp/utility/mmsp2tsv
 src/mmsp/utility/mmsp2xyz
 src/mmsp/utility/wrongendian
+src/topo/mmsp2graph
 
 # Compiled Object files
 *.slo

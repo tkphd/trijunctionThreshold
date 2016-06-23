@@ -41,7 +41,7 @@ void generate(int dim, char* filename)
 
 
 	if (dim == 2)	{
-		const int Lx = 1024;
+		const int Lx = 768;
 		const int Ly = 128;
 
 		grid<2,sparse<phi_type> > initGrid(0, 0,Lx, 0,Ly);
@@ -101,7 +101,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	rank=MPI::COMM_WORLD.Get_rank();
 	#endif
 	const phi_type dt = 0.01;
-	const phi_type width = 17.0;
+	const phi_type width = 14.5;
 	const phi_type epsilon = 1.0e-8;
 	const double mu_hi = 1.00;
 	const double mu_lo = 0.01;

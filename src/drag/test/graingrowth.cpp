@@ -90,7 +90,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	rank = MPI::COMM_WORLD.Get_rank();
 	#endif
 	const phi_type dt = 0.01;
-	const phi_type width = 17.0;
+	const phi_type width = 14.5;
 	const phi_type epsilon = 1.0e-8;
 	const double mu_hi = 1.00;
 	const double mu_lo = 0.01;
