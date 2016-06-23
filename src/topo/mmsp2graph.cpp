@@ -155,14 +155,11 @@ int main(int argc, char* argv[])
 
 				altfile.resize(altfile.length()-8);
 				altfile.append("curv.dat");
-				/*
 				MMSP::grid<2,double> capped(curvature);
 				#pragma omp parallel for
 				for (int i=0; i<nodes(capped); i++)
 					capped(i) = (curvature(i)>2.5) ? 2.5 : curvature(i);
 				MMSP::output(capped, altfile.c_str());
-				*/
-				MMSP::output(curvature, altfile.c_str());
 
 				altfile.resize(altfile.length()-8);
 				altfile.append("topo.csv");
@@ -511,7 +508,6 @@ int main(int argc, char* argv[])
 				for (int i=0; i<nodes(capped); i++)
 					capped(i) = (curvature(i)>2.5) ? 2.5 : curvature(i);
 				MMSP::output(capped, altfile.c_str());
-				//MMSP::output(curvature, altfile.c_str());
 
 				altfile.resize(altfile.length()-8);
 				altfile.append("topo.csv");

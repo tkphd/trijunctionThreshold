@@ -197,14 +197,7 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 	const double fmax=2.0;
 	const double fmin=0.0;
 	double min=M_PI; //sqrt(std::numeric_limits<float>::max());
-	double minM = min;
-	double minL = min;
-	double minH = min;
-
 	double max=-M_PI; //-sqrt(std::numeric_limits<float>::max());
-	double maxM = max;
-	double maxL = max;
-	double maxH = max;
 
 	double epsilonsq = 4.5e-5;
 
@@ -226,14 +219,7 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 		#pragma omp parallel
 		{
 			double myMin = min;
-			double myMinM = minM;
-			double myMinL = minL;
-			double myMinH = minH;
-
 			double myMax = max;
-			double myMaxM = maxM;
-			double myMaxL = maxL;
-			double myMaxH = maxH;
 
 			#pragma omp for nowait
 			for (int i=0; i<MMSP::nodes(magnitude); i++) {
@@ -272,33 +258,17 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 					lap -= weight*(ph - 2.0*pc + pl);
 				}
 
-				if (magnitude(i) < myMinM)
-					myMinM = magnitude(i);
-				if (magnitude(i) > myMaxM)
-					myMaxM = magnitude(i);
-
-				if (lap < myMinL)
-					myMinL = lap;
-				if (lap > myMaxL)
-					myMaxL = lap;
-
-				if (H < myMinH)
-					myMinH = H;
-				if (H > myMaxH)
-					myMaxH = H;
-
 				if (H>0.0) {
 					if (lap<0.0)
 						H = lap;
 					else
 						H = magnitude(i);
 				}
-				cost(x) = H;
 				if (H < myMin)
 					myMin = H;
 				if (H > myMax)
 					myMax = H;
-
+				cost(x) = H;
 			}
 
 			#pragma omp critical
@@ -307,30 +277,9 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 					min = myMin;
 				if (myMax > max)
 					max = myMax;
-
-				if (myMinM < minM)
-					minM = myMinM;
-				if (myMaxM > maxM)
-					maxM = myMaxM;
-
-				if (myMinL < minL)
-					minL = myMinL;
-				if (myMaxL > maxL)
-					maxL = myMaxL;
-
-				if (myMinH < minH)
-					minH = myMinH;
-				if (myMaxH > maxH)
-					maxH = myMaxH;
 			}
 
-
 		}
-
-		std::cout<<"\nCost spans ["<<min <<','<<max <<"]. "<<std::endl;
-		std::cout<<  " MAG spans ["<<minM<<','<<maxM<<"]. "<<std::endl;
-		std::cout<<  " LAP spans ["<<minL<<','<<maxL<<"]. "<<std::endl;
-		std::cout<<  "  2H spans ["<<minH<<','<<maxH<<"]. "<<std::endl;
 
 		#pragma omp parallel for
 		for (int i=0; i<MMSP::nodes(cost); i++) {
@@ -341,6 +290,93 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 				cost(i) = fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
 		}
 	} else if (dim==3) {
+		// Cost of moving through the grain boundary equals the curvature of |phi| at
+		// the point. Mean curvature 2H = -div.normal=-div.(grad |phi|/|grad|phi||).
+		// If 2H>0, take cost as |phi| instead.
+
+		MMSP::grid<3,double> magnitude(0,MMSP::g0(grid,0),MMSP::g1(grid,0),MMSP::g0(grid,1),MMSP::g1(grid,1),MMSP::g0(grid,2),MMSP::g1(grid,2));
+		for (int d=0; d<dim; d++)
+			dx(magnitude,d) = dx(grid,d);
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(grid); i++) {
+			MMSP::vector<int> x = MMSP::position(grid,i);
+			magnitude(x) = grid(i).getMagPhi();
+		}
+
+		#pragma omp parallel
+		{
+			double myMin = min;
+			double myMax = max;
+
+			#pragma omp for nowait
+			for (int i=0; i<MMSP::nodes(magnitude); i++) {
+				MMSP::vector<int> x = MMSP::position(magnitude,i);
+				double H = 0.0;
+				double lap = 0.0;
+
+				// Get central values
+				MMSP::vector<T> grad = MMSP::gradient(magnitude, x);
+				double maggradsq = grad*grad;
+				const T& pc = magnitude(x);
+				const T  Mc = (maggradsq>epsilonsq) ? 1.0 / sqrt(maggradsq) : 0.0;
+
+				for (int d=0; d<dim; d++) {
+					// Central second-order difference
+					// Get low values
+					x[d] -= 1;
+					grad = MMSP::gradient(magnitude, x);
+					maggradsq = grad*grad;
+					const T& pl = magnitude(x);
+					const T  Ml = (maggradsq>epsilonsq) ? 1.0 / sqrt(maggradsq) : 0.0;
+
+					// Get high values
+					x[d] += 2;
+					grad = MMSP::gradient(magnitude, x);
+					maggradsq = grad*grad;
+					const T& ph = magnitude(x);
+					const T  Mh = (maggradsq>epsilonsq) ? 1.0 / sqrt(maggradsq) : 0.0;
+
+					// Return to center
+					x[d] -= 1;
+
+					// Put 'em all together (note -=, since it's the negative curvature)
+					double weight = 1.0/(dx(grid,d) * dx(grid,d));
+					H -= 0.5*weight*( (Mh+Mc)*(ph-pc) - (Mc+Ml)*(pc-pl) );
+					lap -= weight*(ph - 2.0*pc + pl);
+				}
+
+				if (H>0.0) {
+					if (lap<0.0)
+						H = lap;
+					else
+						H = magnitude(i);
+				}
+				if (H < myMin)
+					myMin = H;
+				if (H > myMax)
+					myMax = H;
+				cost(x) = H;
+			}
+
+			#pragma omp critical
+			{
+				if (myMin < min)
+					min = myMin;
+				if (myMax > max)
+					max = myMax;
+			}
+
+		}
+
+		#pragma omp parallel for
+		for (int i=0; i<MMSP::nodes(cost); i++) {
+			MMSP::vector<int> x = position(cost, i);
+			if (magnitude(x) > 0.725)
+				cost(i) = 10.0*fmax; // high cost in bulk
+			else
+				cost(i) = fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
+		}
 	}
 } // determine_weights
 
