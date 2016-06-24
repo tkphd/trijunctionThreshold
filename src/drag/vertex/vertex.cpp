@@ -42,8 +42,8 @@ void generate(int dim, char* filename)
 
 
 	if (dim == 2)	{
-		const int Lx = 512;
-		const int Ly = 512;
+		const int Lx = 480;
+		const int Ly = 480;
 
 		grid<2,sparse<phi_type> > initGrid(0, 0,Lx, 0,Ly);
 
@@ -66,11 +66,11 @@ void generate(int dim, char* filename)
 		s[1] = (4.0 + 2.0/3) / 13.0 * Ly;
 		local_seeds.push_back(s);
 		// Right seed
-		s[0] += (4.0 + 1.0/3) / 13.0 * Lx;
+		s[0] += (4.0 + 2.0/3) / 13.0 * Lx;
 		s[1] += (1.0 + 2.0/3) / 13.0 * Lx;
 		local_seeds.push_back(s);
 		// Left seed
-		s[0] -= 2.0 * (4.0 + 1.0/3) / 13.0 * Lx;
+		s[0] -= 2.0 * (4.0 + 2.0/3) / 13.0 * Lx;
 		local_seeds.push_back(s);
 		// Bottom seed
 		s[0] = Lx/2;
@@ -110,11 +110,11 @@ void generate(int dim, char* filename)
 		s[1] = (4.0 + 2.0/3) / 13.0 * Ly;
 		local_seeds.push_back(s);
 		// Right seed
-		s[0] += (4.0 + 1.0/3) / 13.0 * Lx;
+		s[0] += (4.0 + 2.0/3) / 13.0 * Lx;
 		s[1] += (1.0 + 2.0/3) / 13.0 * Lx;
 		local_seeds.push_back(s);
 		// Left seed
-		s[0] -= 2.0 * (4.0 + 1.0/3) / 13.0 * Lx;
+		s[0] -= 2.0 * (4.0 + 2.0/3) / 13.0 * Lx;
 		local_seeds.push_back(s);
 		// Bottom seed
 		s[0] = Lx/2;
