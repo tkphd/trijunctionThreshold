@@ -14,7 +14,7 @@ flags = -I../ -I$(incdir)
 BG_XL = /bgsys/drivers/ppcfloor/comm/xl
 BG_INC = -I$(BG_XL)/include
 BG_LIB = -L$(BG_XL)/lib
-qcompiler = $(BG_XL)/bin/mpixlcxx_r -O3 -qflag=w -qstrict -qmaxmem=-1
+qcompiler = $(BG_XL)/bin/mpixlcxx -O3 -qflag=w -qstrict -qmaxmem=-1
 
 qflags = $(BG_INC) $(BG_LIB) $(flags) -I/bgsys/apps/CCNI/zlib/zlib-1.2.7/include -L/bgsys/apps/CCNI/zlib/zlib-1.2.7/lib
 #qflags = $(BG_INC) $(BG_LIB) $(flags) $(CFLAGS) $(LDFLAGS)

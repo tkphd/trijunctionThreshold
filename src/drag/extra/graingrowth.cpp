@@ -94,8 +94,8 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	const phi_type epsilon = 1.0e-8;
 	const double mu_hi = 1.00;
 	const double mu_lo = 0.01;
-	const double mu_x = 0.01;
-	const double mu_s = 0.01;
+	const double mu_x = 0.6422;
+	const double mu_s = 0.0175;
 
 	for (int step = 0; step < steps; step++) {
 		if (rank==0) print_progress(step, steps);
