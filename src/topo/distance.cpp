@@ -23,14 +23,16 @@
 #include "sparse_priority_queue.h"
 #include "distance.h"
 
-template <int dim, typename T> double radius(const MMSP::vector<T>& a, const MMSP::vector<T>& b) {
-  double radius=0.0;
+template <int dim, typename T> double radius(const MMSP::vector<T>& a, const MMSP::vector<T>& b)
+{
+	double radius=0.0;
 	for (int d=0; d<dim; d++)
 		radius+=std::pow(double(b[d]-a[d]), 2.0);
-  return sqrt(radius);
+	return sqrt(radius);
 }
 
-MMSP::vector<int> getPosition(const SparseDistanceVoxel& dv) {
+MMSP::vector<int> getPosition(const SparseDistanceVoxel& dv)
+{
 	MMSP::vector<int> x(3);
 	for (int d=0; d<3; d++)
 		x[d]=dv.getPosition(d);
@@ -46,81 +48,77 @@ void propagate_cost(const SparseDistanceVoxel* core_voxel,
                     MMSP::grid<dim,SparseDistanceVoxel>& distimage,
                     SparsePriorityQueue& queue)
 {
-  if (dim == 2) {
-	  const MMSP::vector<int> position = getPosition(*core_voxel);
+	if (dim == 2) {
+		const MMSP::vector<int> position = getPosition(*core_voxel);
 		const int core_distance = distimage(position).getValue(index);
-  	MMSP::vector<int> x(position);
-    // Loop over 9 neighboring Voxels
-   	for (x[1]=position[1]-1; x[1]<position[1]+2; x[1]++) {
-	    for (x[0]=position[0]-1; x[0]<position[0]+2; x[0]++) {
-        if (x[0]==position[0] && x[1]==position[1]) continue; // know thyself
-    		T step=radius<2,int>(position, x);
-        MMSP::vector<int> p(x);
-        for (int d=0; d<dim; d++)
-        	MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),b0(grid,d),b1(grid,d));
+		MMSP::vector<int> x(position);
+		// Loop over 9 neighboring Voxels
+		for (x[1]=position[1]-1; x[1]<position[1]+2; x[1]++) {
+			for (x[0]=position[0]-1; x[0]<position[0]+2; x[0]++) {
+				if (x[0]==position[0] && x[1]==position[1]) continue; // know thyself
+				T step=radius<2,int>(position, x);
+				MMSP::vector<int> p(x);
+				for (int d=0; d<dim; d++)
+					MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),b0(grid,d),b1(grid,d));
 
-        if (grid(p).length()<2) continue;
-        // Make sure test point has at least one phase in common with source vertex
+				if (grid(p).length()<2) continue;
+				// Make sure test point has at least one phase in common with source vertex
 				int matching_ids = 0;
 				const MMSP::sparse<U>* s = &(grid(p));
-        for (int i=0; i<s->length(); i++) {
-        	int a=s->index(i);
-        	if (neighbor_ids.find(a) != neighbor_ids.end())
-        		++matching_ids; // match found :)
-        }
-        if (matching_ids>0) {
+				for (int i=0; i<s->length(); i++) {
+					int a=s->index(i);
+					if (neighbor_ids.find(a) != neighbor_ids.end())
+						++matching_ids; // match found :)
+				}
+				if (matching_ids>0) {
 					// Enqueue valid voxel
-  	      SparseDistanceVoxel* Voxel = &( distimage(p) );
-    	 		T distance = core_distance + step + cost(p);
-    	 		omp_set_lock(Voxel->ompLock());
-  	  	  if (Voxel->getValue(index) > distance) {
- 	  	  	  Voxel->setValue(index,distance); // This part requires mutex locks for OpenMP
-	 	     	  if ( !queue.in_heap( Voxel ) ) queue.push(index, Voxel); // Add new Voxel to heap
-  	 	     	else queue.update_position(index, Voxel); // Update position of Voxel in the heap based on new value
-    		  }
-    	 		omp_unset_lock(Voxel->ompLock());
-      	}
-      }
-    }
-  } else if (dim == 3) {
-	  const MMSP::vector<int> position = getPosition(*core_voxel);
+					SparseDistanceVoxel* Voxel = &( distimage(p) );
+					T distance = core_distance + step + cost(p);
+					if (Voxel->getValue(index) > distance) {
+						Voxel->setValue(index,distance); // This part requires mutex locks for OpenMP
+						if ( !queue.in_heap( Voxel ) ) queue.push(index, Voxel); // Add new Voxel to heap
+						else queue.update_position(index, Voxel); // Update position of Voxel in the heap based on new value
+					}
+				}
+			}
+		}
+	} else if (dim == 3) {
+		const MMSP::vector<int> position = getPosition(*core_voxel);
 		const int core_distance = distimage(position).getValue(index);
-  	MMSP::vector<int> x(position);
-    // Loop over 27 neighboring Voxels
-   	for (x[2]=position[2]-1; x[2]<position[2]+2; x[2]++) {
-	   	for (x[1]=position[1]-1; x[1]<position[1]+2; x[1]++) {
-		    for (x[0]=position[0]-1; x[0]<position[0]+2; x[0]++) {
-      	  if (x[0]==position[0] && x[1]==position[1] && x[2]==position[2]) continue; // know thyself
-    			T step=radius<3,int>(position, x);
-	        MMSP::vector<int> p(x);
-	        for (int d=0; d<dim; d++)
-  	      	MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),b0(grid,d),b1(grid,d));
+		MMSP::vector<int> x(position);
+		// Loop over 27 neighboring Voxels
+		for (x[2]=position[2]-1; x[2]<position[2]+2; x[2]++) {
+			for (x[1]=position[1]-1; x[1]<position[1]+2; x[1]++) {
+				for (x[0]=position[0]-1; x[0]<position[0]+2; x[0]++) {
+					if (x[0]==position[0] && x[1]==position[1] && x[2]==position[2]) continue; // know thyself
+					T step=radius<3,int>(position, x);
+					MMSP::vector<int> p(x);
+					for (int d=0; d<dim; d++)
+						MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),b0(grid,d),b1(grid,d));
 
-  	      if (grid(p).length()<3) continue;
-	        // Make sure test point has at least one phase in common with source vertex
+					if (grid(p).length()<3) continue;
+					// Make sure test point has at least one phase in common with source vertex
 					int matching_ids = 0;
 					const MMSP::sparse<U>* s = &(grid(p));
-        	for (int i=0; i<s->length(); i++) {
-        		int a=s->index(i);
-	        	if (neighbor_ids.find(a) != neighbor_ids.end())
-  	      		++matching_ids; // match found :)
-    	    }
-      	  if (matching_ids>1) {
+					for (int i=0; i<s->length(); i++) {
+						int a=s->index(i);
+						if (neighbor_ids.find(a) != neighbor_ids.end())
+							++matching_ids; // match found :)
+					}
+					if (matching_ids>1) {
 						// Enqueue valid voxel
-		        SparseDistanceVoxel* Voxel = &( distimage(p) );
-	  	   		T distance = core_distance + step + cost(p);
-    		 		omp_set_lock(Voxel->ompLock());
-  		    	if (Voxel->getValue(index) > distance) {
- 	  			    Voxel->setValue(index,distance);
- 	  	   		  if ( !queue.in_heap( Voxel ) ) queue.push(index, Voxel); // Add new Voxel to heap
-  	 	     		else queue.update_position(index, Voxel); // Update position of Voxel in the heap based on new value
-		    	  }
-  	  	 		omp_unset_lock(Voxel->ompLock());
-	    	  }
-  	    }
-    	}
-    }
-  }
+						SparseDistanceVoxel* Voxel = &( distimage(p) );
+						T distance = core_distance + step + cost(p);
+						if (Voxel->getValue(index) > distance) {
+							Voxel->setValue(index,distance);
+							if ( !queue.in_heap( Voxel ) ) queue.push(index, Voxel); // Add new Voxel to heap
+							else queue.update_position(index, Voxel); // Update position of Voxel in the heap based on new value
+						}
+					}
+				}
+			}
+		}
+	}
 } // propagate_cost
 
 template<int dim, typename T>
@@ -135,8 +133,8 @@ bool isLocalMin(const MMSP::grid<dim,MMSP::sparse<T> >& grid, const MMSP::vector
 	if (dim==2) {
 		for (x[1]=position[1]-2; x[1]<=position[1]+2; x[1]++) {
 			for (x[0]=position[0]-2; x[0]<=position[0]+2; x[0]++) {
-        if (x[0]==position[0] && x[1]==position[1]) continue; // know thyself
-        else if (radius<2>(position,x)>2.0+epsilon) continue; // skip cube corners
+				if (x[0]==position[0] && x[1]==position[1]) continue; // know thyself
+				else if (radius<2>(position,x)>2.0+epsilon) continue; // skip cube corners
 				MMSP::vector<int> p(x);
 				for (int d=0; d<dim; d++)
 					MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),MMSP::b0(grid,d),MMSP::b1(grid,d));
@@ -147,8 +145,8 @@ bool isLocalMin(const MMSP::grid<dim,MMSP::sparse<T> >& grid, const MMSP::vector
 		for (x[2]=position[2]-2; x[2]<=position[2]+2; x[2]++) {
 			for (x[1]=position[1]-2; x[1]<=position[1]+2; x[1]++) {
 				for (x[0]=position[0]-2; x[0]<=position[0]+2; x[0]++) {
-      	  if (x[0]==position[0] && x[1]==position[1] && x[2]==position[2]) continue; // know thyself
-	        else if (radius<3>(position,x)>3.0+epsilon) continue; // skip cube corners
+					if (x[0]==position[0] && x[1]==position[1] && x[2]==position[2]) continue; // know thyself
+					else if (radius<3>(position,x)>3.0+epsilon) continue; // skip cube corners
 					MMSP::vector<int> p(x);
 					for (int d=0; d<dim; d++)
 						MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),MMSP::b0(grid,d),MMSP::b1(grid,d));
@@ -175,7 +173,7 @@ void locate_vertices(const MMSP::grid<dim,MMSP::sparse<T> >& grid, std::map<int,
 		if (isLocalMin(grid,x)) {
 			for (int d=0; d<dim; d++)
 				vertex[d]=x[d];
-	    // Associate a set of neighbor-ids with this queue
+			// Associate a set of neighbor-ids with this queue
 			std::set<int> local_ids;
 			for (int j=0; j<grid(vertex).length(); j++)
 				local_ids.insert( grid(vertex).index(j) );
@@ -397,19 +395,18 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 	for (int i=0; i<MMSP::nodes(distance_grid); i++) {
 		x=MMSP::position(grid,i);
 		for (int d=0; d<dim; d++)
-       distance_grid(x).setPosition(d,x[d]);
-		omp_init_lock(distance_grid(x).ompLock());
+			distance_grid(x).setPosition(d,x[d]);
 	}
 
 	// Associate grain IDs with each vertex.
 	std::vector<std::set<int> > phase_ids;
 	phase_ids.resize(global_vertices.size());
-	#pragma omp parallel for private(x) schedule(dynamic)
+
 	for (int i=0; i<int(global_vertices.size()); i++) {
-    MMSP::sparse<U>* s = &(phi(global_vertices[i]));
-    // Associate a set of neighbor-ids with this queue
+		MMSP::sparse<U>* s = &(phi(global_vertices[i]));
+		// Associate a set of neighbor-ids with this queue
 		for (int j=0; j<s->length(); j++)
-				phase_ids[i].insert( s->index(j) );
+			phase_ids[i].insert( s->index(j) );
 	}
 
 	// create the voxel Heap
@@ -428,24 +425,21 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 	// Needs mutual exclusion locks.
 
 	// Each priority queue should be independent: operating on index i only.
-	#pragma omp parallel for private(x) schedule(dynamic)
+
 	for (int i=0; i<int(global_vertices.size()); i++) {
 		x = global_vertices[i];
 
 		// Enqueue this node's vertices (local)
 		SparseDistanceVoxel* p = &( distance_grid(x) );
-		omp_set_lock(p->ompLock());
 		p->setValue(i, 0.0);
-		omp_unset_lock(p->ompLock());
 		propagate_cost(p, i, phi, cost, phase_ids[i], distance_grid, queues[i]);
 	}
 
-	#pragma omp parallel for private(x) schedule(dynamic)
 	for (int i=0; i<int(global_vertices.size()); i++) {
 		x = global_vertices[i];
 
 		// Fast-march grid points associated with this vertex
-		while( !(queues[i].empty()) ) {
+		while ( !(queues[i].empty()) ) {
 			const SparseDistanceVoxel* p = queues[i].top();
 			queues[i].pop(i);
 			propagate_cost(p, i, phi, cost, phase_ids[i], distance_grid, queues[i]);
@@ -456,7 +450,6 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 	}
 
 	// Copy result from distance_grid to phase-field grid
-	#pragma omp parallel for private(x) schedule(dynamic)
 	for (int i=0; i<MMSP::nodes(grid); i++) {
 		x=MMSP::position(grid, i);
 		SparseDistanceVoxel* Voxel=&(distance_grid(x));
@@ -464,17 +457,16 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 			int index = Voxel->index(j);
 			grid(x).set(index) = Voxel->getValue(index);
 		}
-		omp_destroy_lock(Voxel->ompLock());
 	}
 } // approximate_cost
 
 template <int dim, typename T>
 void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
-                  const MMSP::grid<dim,SparseDistanceVoxel>& dist_grid,
-                  const int id,
-                  const MMSP::vector<int>& start,
-                  const MMSP::vector<int>& finish,
-                  std::map<int,std::vector<MMSP::vector<int> > >& path)
+                   const MMSP::grid<dim,SparseDistanceVoxel>& dist_grid,
+                   const int id,
+                   const MMSP::vector<int>& start,
+                   const MMSP::vector<int>& finish,
+                   std::map<int,std::vector<MMSP::vector<int> > >& path)
 {
 	// Pursue a Greedy algorithm (Method of Steepest Descents) to reach the Finish from the Start
 	// ... unless a more attractive Finish is found
@@ -601,9 +593,9 @@ void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
 
 template <int dim, typename T>
 void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
-                 const MMSP::grid<dim,SparseDistanceVoxel>& distance,
-                 const std::vector<MMSP::vector<int> >& global_vertices,
-                 std::map<grainid,std::map<grainid,std::vector<MMSP::vector<int> > > >& global_edges)
+                  const MMSP::grid<dim,SparseDistanceVoxel>& distance,
+                  const std::vector<MMSP::vector<int> >& global_vertices,
+                  std::map<grainid,std::map<grainid,std::vector<MMSP::vector<int> > > >& global_edges)
 {
 	global_edges.clear();
 	// Choose a starting vertex
@@ -644,9 +636,9 @@ void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 
 template <int dim, typename T>
 void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
-                 const std::vector<MMSP::vector<int> >& global_vertices,
-                 const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
-                 std::set<std::vector<int> >& global_cycles)
+                   const std::vector<MMSP::vector<int> >& global_vertices,
+                   const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
+                   std::set<std::vector<int> >& global_cycles)
 {
 	// Breadth-first search for chordless cycles of the graph. These are faces.
 	// Note: Some cycles span multiple grains, and should not be taken seriously.
@@ -667,12 +659,12 @@ void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 		for (int p=0; p<grid(global_vertices[i]).length(); p++)
 			phases_i.insert(grid(global_vertices[i]).index(p));
 
-    for (int j=i+1; j<int(global_vertices.size())-1; j++) {
+		for (int j=i+1; j<int(global_vertices.size())-1; j++) {
 			std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >::const_iterator it_j=global_edges.find(j);
 			if (it_j==global_edges.end())
 				continue;
 			else if (it_i->second.find(j)==it_i->second.end() || (it_i->second.find(j))->second.size()==0) //if (!adjacency[i+j*global_vertices.size()]) -> !adj(i,j)
-        continue;
+				continue;
 			// Store set of phases present at vertex J
 			std::set<grainid> phases_j;
 			for (int p=0; p<grid(global_vertices[j]).length(); p++)
@@ -684,10 +676,10 @@ void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 			if (match_j<dim)
 				continue; // J cannot be adjacent to I, even if an edge exists, which it should not
 
-      std::list<std::vector<int> > candidates;
-      for (int k=j+1; k<int(global_vertices.size()); k++) {
+			std::list<std::vector<int> > candidates;
+			for (int k=j+1; k<int(global_vertices.size()); k++) {
 				if (it_i->second.find(k)==it_i->second.end() || (it_i->second.find(k))->second.size()==0) //if (!adjacency[i+k*global_vertices.size()]) -> !adj(i,k)
-          continue;
+					continue;
 				// Compare phases in k to those in i. There must be at least dim matches.
 				std::set<grainid> phases_k;
 				for (int p=0; p<grid(global_vertices[k]).length(); p++)
@@ -708,21 +700,21 @@ void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 					cycle.push_back(k);
 					cycle.push_back(i);
 					global_cycles.insert(cycle);
-          continue;
-        }
-        // JIK...LMJ may be a cycle.
-        std::vector<int> v;
-        v.resize(3);
-        v[0]=j;
-        v[1]=i;
-        v[2]=k;
-        candidates.push_back(v);
-      }
-      while (!candidates.empty()) {
-      	// adj(i,j) is known.
-        std::vector<int> v = candidates.front();
-        candidates.pop_front();
-        int l = v.back();
+					continue;
+				}
+				// JIK...LMJ may be a cycle.
+				std::vector<int> v;
+				v.resize(3);
+				v[0]=j;
+				v[1]=i;
+				v[2]=k;
+				candidates.push_back(v);
+			}
+			while (!candidates.empty()) {
+				// adj(i,j) is known.
+				std::vector<int> v = candidates.front();
+				candidates.pop_front();
+				int l = v.back();
 				// Store set of phases present at vertex L
 				std::set<grainid> phases_l;
 				for (int p=0; p<grid(global_vertices[l]).length(); p++)
@@ -731,28 +723,28 @@ void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 				std::set<grainid> phases_k;
 				for (int p=0; p<grid(global_vertices[v[2]]).length(); p++)
 					phases_k.insert(grid(global_vertices[v[2]]).index(p));
-        std::set<grainid> phases_jik;
-        if (1) {
-        	std::set<grainid> phases;
-        	// collect all possible grainids
-        	for (int n=0; n<3; n++)
+				std::set<grainid> phases_jik;
+				if (1) {
+					std::set<grainid> phases;
+					// collect all possible grainids
+					for (int n=0; n<3; n++)
 						for (int p=0; p<grid(global_vertices[v[n]]).length(); p++)
 							phases.insert(grid(global_vertices[v[n]]).index(p));
 					// store only those ids present at all three vertices starting this cycle
 					for (std::set<grainid>::const_iterator it_phi=phases.begin(); it_phi!=phases.end(); it_phi++)
 						if (phases_i.find(*it_phi)!=phases_i.end() && phases_j.find(*it_phi)!=phases_j.end() && phases_k.find(*it_phi)!=phases_k.end())
 							phases_jik.insert(*it_phi);
-        }
-        if (phases_jik.size() < dim-1)
-        	continue; // jik cannot be on the same face
-        for (int m=i+2; m<int(global_vertices.size()); m++) {
-          if (std::find(v.begin(), v.end(), m) != v.end())
-            continue;
+				}
+				if (phases_jik.size() < dim-1)
+					continue; // jik cannot be on the same face
+				for (int m=i+2; m<int(global_vertices.size()); m++) {
+					if (std::find(v.begin(), v.end(), m) != v.end())
+						continue;
 					std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >::const_iterator it_m=global_edges.find(m);
 					if (it_m==global_edges.end())
 						continue;
 					if (it_m->second.find(l)==it_m->second.end() || (it_m->second.find(l))->second.size()==0) //if (!adjacency[m+l*global_vertices.size()]) -> !adj(m,l)
-            continue;
+						continue;
 					std::set<grainid> phases_m;
 					for (int p=0; p<grid(global_vertices[m]).length(); p++)
 						phases_m.insert(grid(global_vertices[m]).index(p));
@@ -764,48 +756,48 @@ void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 					if (match_m<dim-1)
 						continue;
 					// Compare phases in m to those in l. At least dim phases must match for these to be adjacent.
-          bool chord = false;
-          for (int n=1; n<int(v.size())-1; n++)
+					bool chord = false;
+					for (int n=1; n<int(v.size())-1; n++)
 						if (it_m->second.find(v[n])!=it_m->second.end() && (it_m->second.find(v[n]))->second.size()>0) // if (adjacency[m+v[n]*global_vertices.size()])
-              chord = true;
-          if (chord)
-            continue;
-          // If m is the penultimate vertex in the cycle, then m must share dim phases with j.
-          match_m=0;
+							chord = true;
+					if (chord)
+						continue;
+					// If m is the penultimate vertex in the cycle, then m must share dim phases with j.
+					match_m=0;
 					for (std::set<int>::const_iterator it_phi=phases_m.begin(); it_phi!=phases_m.end(); it_phi++)
 						if (phases_j.find(*it_phi)!=phases_j.end())
 							match_m++;
-          if (match_m>=dim && it_m->second.find(j)!=it_m->second.end() && (it_m->second.find(j))->second.size()>0) { //if (adjacency[m+j*global_vertices.size()])
-          	std::vector<int> cycle;
-            for (int n=0; n<int(v.size()); n++)
-          		cycle.push_back(v[n]);
-         		cycle.push_back(m);
-         		cycle.push_back(v[0]);
-          	global_cycles.insert(cycle);
-            continue;
-          }
-          // If m shares fewer than dim phases with j, that's OK- it may be an earlier link in the chain.
-          std::vector<int> w(v);
-          w.push_back(m);
-         	candidates.push_back(w);
-        }
-      }
-    }
-  }
-  if (dim==2) printf("Found %4lu chordless cycles. ", global_cycles.size());
-  else printf("Found %5lu chordless cycles. ", global_cycles.size());
+					if (match_m>=dim && it_m->second.find(j)!=it_m->second.end() && (it_m->second.find(j))->second.size()>0) { //if (adjacency[m+j*global_vertices.size()])
+						std::vector<int> cycle;
+						for (int n=0; n<int(v.size()); n++)
+							cycle.push_back(v[n]);
+						cycle.push_back(m);
+						cycle.push_back(v[0]);
+						global_cycles.insert(cycle);
+						continue;
+					}
+					// If m shares fewer than dim phases with j, that's OK- it may be an earlier link in the chain.
+					std::vector<int> w(v);
+					w.push_back(m);
+					candidates.push_back(w);
+				}
+			}
+		}
+	}
+	if (dim==2) printf("Found %4lu chordless cycles. ", global_cycles.size());
+	else printf("Found %5lu chordless cycles. ", global_cycles.size());
 }
 
 
 template <int dim, typename T>
 int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
-                      const std::vector<MMSP::vector<int> >& global_vertices,
-                      const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
-                      const std::set<std::vector<int> >& global_cycles,
-                      std::map<grainid,std::set<int> >& grainverts,
-                      std::map<grainid,std::set<std::set<int> > >& grainedges,
-                      std::map<grainid,std::set<std::vector<int> > >& graincycles,
-                      std::map<grainid,std::map<int,std::vector<int> > >& grainfaces)
+                    const std::vector<MMSP::vector<int> >& global_vertices,
+                    const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
+                    const std::set<std::vector<int> >& global_cycles,
+                    std::map<grainid,std::set<int> >& grainverts,
+                    std::map<grainid,std::set<std::set<int> > >& grainedges,
+                    std::map<grainid,std::set<std::vector<int> > >& graincycles,
+                    std::map<grainid,std::map<int,std::vector<int> > >& grainfaces)
 {
 	// Assign vertex IDs (v) to constituent grains (using sparse data)
 	for (unsigned int v=0; v<global_vertices.size(); v++) {
@@ -815,8 +807,8 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 	} // assign vertices
 
 	// Assign edges to grains based on the local set of vertices and the global set of edges
- 	//	For each vertex-pair v0 and v1 assigned to a grain, if there exists
- 	//	a global edge (v0,v1), then this grain shares that edge.
+	//	For each vertex-pair v0 and v1 assigned to a grain, if there exists
+	//	a global edge (v0,v1), then this grain shares that edge.
 	std::vector<int> vertex_hits(global_vertices.size(),0); // keep track of vertices contributing to edges
 	for (std::map<grainid,std::set<int> >::iterator it_grn=grainverts.begin(); it_grn!=grainverts.end(); it_grn++) {
 		for (std::set<int>::const_iterator it_v0=it_grn->second.begin(); it_v0!=it_grn->second.end(); it_v0++) {
@@ -828,14 +820,14 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 				// If the edge (v0,v1) exists, add it to this grain
 				std::map<int,std::vector<MMSP::vector<int> > >::const_iterator it_edg_v1=it_edg_v0->second.find(*it_v1);
 				if (it_edg_v1==it_edg_v0->second.end()) continue; // if no, move on
- 				std::set<int> edg;
- 				edg.insert(*it_v0);
- 				edg.insert(*it_v1);
+				std::set<int> edg;
+				edg.insert(*it_v0);
+				edg.insert(*it_v1);
 				grainedges[it_grn->first].insert(edg);
 				//vertex_hits[*it_v0]++;
- 			}
- 		}
- 	} // assign edges
+			}
+		}
+	} // assign edges
 
 	// Assign cycles to grains based on the local set of vertices
 	for (std::map<grainid,std::set<int> >::iterator it_grn=grainverts.begin(); it_grn!=grainverts.end(); it_grn++) {
@@ -853,12 +845,14 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 	for (std::map<grainid,std::set<std::vector<int> > >::iterator it_g0=graincycles.begin(); it_g0!=graincycles.end(); it_g0++) {
 		for (std::set<std::vector<int> >::iterator it_c0=it_g0->second.begin(); it_c0!=it_g0->second.end(); it_c0++) {
 			int cyclecount=0;
-			std::vector<int> c0(*it_c0); c0.pop_back();
+			std::vector<int> c0(*it_c0);
+			c0.pop_back();
 			std::sort(c0.begin(),c0.end());
 			for (std::map<grainid,std::set<std::vector<int> > >::iterator it_g1=graincycles.begin(); it_g1!=graincycles.end(); it_g1++) {
 				for (std::set<std::vector<int> >::iterator it_c1=it_g1->second.begin(); it_c1!=it_g1->second.end(); it_c1++) {
 					if (it_g0->first==it_g1->first) continue;
-					std::vector<int> c1(*it_c1); c1.pop_back();
+					std::vector<int> c1(*it_c1);
+					c1.pop_back();
 					std::sort(c1.begin(),c1.end());
 					if (c0==c1) {
 						// This cycle is shared with another grain. Rejoice!
@@ -993,35 +987,35 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 } // assign_features
 
 std::map<int,int> regenerate_features(const std::map<grainid,std::map<int,std::vector<int> > >& grainfaces,
-                         std::map<grainid,std::set<int> >& grainverts,
-                         std::map<grainid,std::set<std::set<int> > >& grainedges,
-                         std::map<grainid,std::set<std::vector<int> > >& graincycles)
+                                      std::map<grainid,std::set<int> >& grainverts,
+                                      std::map<grainid,std::set<std::set<int> > >& grainedges,
+                                      std::map<grainid,std::set<std::vector<int> > >& graincycles)
 {
 	grainverts.clear();
 	grainedges.clear();
 	//graincycles.clear();
 	std::map<int,int> plateaunic;
 	//for (std::map<grainid,std::map<int,std::vector<int> > >::const_iterator it_grn=grainfaces.begin(); it_grn!=grainfaces.end(); it_grn++) {
-		//for (std::map<int,std::vector<int> >::const_iterator it_cyc=it_grn->second.begin(); it_cyc!=it_grn->second.end(); it_cyc++) {
-		for (std::map<int,std::set<std::vector<int> > >::const_iterator it_fac=graincycles.begin(); it_fac!=graincycles.end(); it_fac++) {
-			for (std::set<std::vector<int> >::const_iterator it_cyc=it_fac->second.begin(); it_cyc!=it_fac->second.end(); it_cyc++) {
-				//graincycles[it_grn->first].insert(it_cyc->second);
-				std::vector<int>::const_iterator it_v0=it_cyc->begin();
-				std::vector<int>::const_iterator it_v1(it_v0);
+	//for (std::map<int,std::vector<int> >::const_iterator it_cyc=it_grn->second.begin(); it_cyc!=it_grn->second.end(); it_cyc++) {
+	for (std::map<int,std::set<std::vector<int> > >::const_iterator it_fac=graincycles.begin(); it_fac!=graincycles.end(); it_fac++) {
+		for (std::set<std::vector<int> >::const_iterator it_cyc=it_fac->second.begin(); it_cyc!=it_fac->second.end(); it_cyc++) {
+			//graincycles[it_grn->first].insert(it_cyc->second);
+			std::vector<int>::const_iterator it_v0=it_cyc->begin();
+			std::vector<int>::const_iterator it_v1(it_v0);
+			it_v1++;
+			while (it_v1!=it_cyc->end()) {
+				grainverts[it_fac->first].insert(*it_v1);
+				std::set<int> edg;
+				edg.insert(*it_v0);
+				edg.insert(*it_v1);
+				plateaunic[*it_v1]++;
+				grainedges[it_fac->first].insert(edg);
+				it_v0++;
 				it_v1++;
-				while (it_v1!=it_cyc->end()) {
-					grainverts[it_fac->first].insert(*it_v1);
-					std::set<int> edg;
-					edg.insert(*it_v0);
-					edg.insert(*it_v1);
-					plateaunic[*it_v1]++;
-					grainedges[it_fac->first].insert(edg);
-					it_v0++;
-					it_v1++;
-					edg.clear();
-				}
+				edg.clear();
 			}
 		}
+	}
 	//}
 
 	return plateaunic;
@@ -1034,18 +1028,18 @@ std::string progressbar(const int n, const int N, const char c)
 					 then at the end of each iteration with n=i+1
 	*/
 	std::stringstream bar;
-  static unsigned long tstart;
-  if (n==0) {
-    tstart = time(NULL);
-    bar<<" ["<<std::flush;
-  } else if (n==N) {
-    unsigned long deltat = time(NULL)-tstart;
-    bar<<c<<"] "<<std::setw(2)<<std::right<<deltat/3600<<"h:"
-                    <<std::setw(2)<<std::right<<(deltat%3600)/60<<"m:"
-                    <<std::setw(2)<<std::right<<deltat%60<<"s"
-                    <<".\n";
-  } else if ((20 * n) % (N-N%5) == 0) bar<<c;
-  return bar.str();
+	static unsigned long tstart;
+	if (n==0) {
+		tstart = time(NULL);
+		bar<<" ["<<std::flush;
+	} else if (n==N) {
+		unsigned long deltat = time(NULL)-tstart;
+		bar<<c<<"] "<<std::setw(2)<<std::right<<deltat/3600<<"h:"
+		   <<std::setw(2)<<std::right<<(deltat%3600)/60<<"m:"
+		   <<std::setw(2)<<std::right<<deltat%60<<"s"
+		   <<".\n";
+	} else if ((20 * n) % (N-N%5) == 0) bar<<c;
+	return bar.str();
 } // progressbar
 
 

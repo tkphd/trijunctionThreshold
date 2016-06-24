@@ -44,23 +44,23 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 
 template <int dim, typename T>
 void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
-                  const MMSP::grid<dim,SparseDistanceVoxel>& dist_grid,
-                  const int id,
-                  const MMSP::vector<int>& start,
-                  const MMSP::vector<int>& finish,
-                  std::map<int,std::vector<MMSP::vector<int> > >& path);
+                   const MMSP::grid<dim,SparseDistanceVoxel>& dist_grid,
+                   const int id,
+                   const MMSP::vector<int>& start,
+                   const MMSP::vector<int>& finish,
+                   std::map<int,std::vector<MMSP::vector<int> > >& path);
 
 template <int dim, typename T>
 void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
-                 const MMSP::grid<dim,SparseDistanceVoxel>& distance,
-                 const std::vector<MMSP::vector<int> >& global_vertices,
-                 std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges);
+                  const MMSP::grid<dim,SparseDistanceVoxel>& distance,
+                  const std::vector<MMSP::vector<int> >& global_vertices,
+                  std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges);
 
 template <int dim, typename T>
 void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
-                 const std::vector<MMSP::vector<int> >& global_vertices,
-                 const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
-                 std::set<std::vector<int> >& global_cycles);
+                   const std::vector<MMSP::vector<int> >& global_vertices,
+                   const std::map<int,std::map<int,std::vector<MMSP::vector<int> > > >& global_edges,
+                   std::set<std::vector<int> >& global_cycles);
 
 template <int dim, typename T>
 int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
