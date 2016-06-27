@@ -1,6 +1,6 @@
 # Tricrystal steady-state trijunction angle
 
-## run1: page 132
+## run1: TK_R3_p132
 * created drag/tricrystal/run1/tricr.000000.dat
 * 1024 &times; 128, a<sub>0</sub> = 64
 * width = 10.0
@@ -8,7 +8,7 @@
 * a = 63.92 &plusmn; 0.61
 * &theta; = 48.98 &plusmn; 0.73
 
-## run2: page 134
+## run2: TK_R3_p134
 * using delta_series.sh
 * 1024 &times; (128,96), a<sub>0</sub> = (64,48)
 * width = 10.0
@@ -23,7 +23,7 @@
 | 768  | 96  | 13.0    | 595           | 48.3 | 39.2    |
 | 768  | 96  | 15.0    | 757           | 48.1 | 45.0    |
 
-## run2: continued, page 137
+## run2: continued, TK_R3_p137
 * using delta_series.sh
 * 768 &times; 128, a<sub>0</sub> = 64
 * width = 10.0

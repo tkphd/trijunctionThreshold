@@ -1,6 +1,6 @@
 # Small grid (2048<sup>2</sup>)
 
-## run1: page 139
+## run1: TK_R3_p139
 * CTCMS job 2501307
 * initial condition: copied ideal/small/small.dat with 80,896 seeds
 * x=0.6422, s=0.0175

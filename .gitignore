@@ -16,6 +16,7 @@
 *.zip
 
 # Data and Executables
+*.csv
 *.dat
 *.ipynb_checkpoints
 *.log
@@ -24,6 +25,7 @@
 *.pvd
 *.sh
 *.sh.*
+*.tsv
 *.vti
 *.xy
 *.xyz
