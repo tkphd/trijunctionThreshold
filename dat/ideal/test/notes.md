@@ -9,6 +9,8 @@
 * CTCMS job 2493910
 * initial condition: copied ideal/test/test.dat with 80,896 seeds
 * width=13.0
+* dt = 0.01
+* t = 100,000&times;dt
 * 64 cores: runtime 16464 seconds
 
 
@@ -16,4 +18,6 @@
 * CTCMS job 2501301
 * initial condition: copied ideal/test/test.dat
 * width=14.5
+* dt = 0.01
+* t = 100,000&times;dt
 * 64 cores: runtime 

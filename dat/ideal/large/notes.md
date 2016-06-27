@@ -9,5 +9,7 @@
 * CTCMS job 2501313
 * initial condition: copied ideal/large/large.dat with 5,120,000 seeds
 * width=14.5
+* dt = 0.01
+* t = 100,000&times;dt
 * 64 cores: runtime
 

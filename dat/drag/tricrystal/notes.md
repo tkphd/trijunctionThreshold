@@ -2,17 +2,19 @@
 
 ## run1: TK_R3_p132
 * created drag/tricrystal/run1/tricr.000000.dat
-* 1024 &times; 128, a<sub>0</sub> = 64
+* 1024&times;128, a<sub>0</sub> = 64
 * width = 10.0
-* t = 150,000 &times; 0.01
-* a = 63.92 &plusmn; 0.61
-* &theta; = 48.98 &plusmn; 0.73
+* dt = 0.01
+* t = 150,000&times;dt
+* a = 63.92&plusmn;0.61
+* &theta; = 48.98&plusmn;0.73
 
 ## run2: TK_R3_p134
 * using delta_series.sh
-* 1024 &times; (128,96), a<sub>0</sub> = (64,48)
+* 1024&times;(128,96), a<sub>0</sub> = (64,48)
 * width = 10.0
-* t = 150,000 &times; 0.01
+* dt = 0.01
+* t = 150,000&times;dt
 | Lx   | Ly  | &delta; | x<sub>0</sub> | a    | &theta; |
 | ---- | --- | ------- | ------------- | ---- | ------- |
 | 1024 | 128 | 10.0    |               | 63.9 | 49.0    |
@@ -25,9 +27,10 @@
 
 ## run2: continued, TK_R3_p137
 * using delta_series.sh
-* 768 &times; 128, a<sub>0</sub> = 64
+* 768&times;128, a<sub>0</sub> = 64
 * width = 10.0
-* t = 150,000 &times; 0.01
+* dt = 0.01
+* t = 150,000&times;dt
 | &delta; | x<sub>0</sub> | a    | &theta; |
 | ------- | ------------- | ---- | ------- |
 | 10.0    | 430           | 64.1 | 48.8    | 

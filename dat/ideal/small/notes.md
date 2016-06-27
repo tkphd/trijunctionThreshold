@@ -9,5 +9,7 @@
 * CTCMS job 2501306
 * initial condition: copied ideal/small/small.dat with 321,536 seeds
 * width=14.5
+* dt = 0.01
+* t = 100,000&times;dt
 * 64 cores: runtime
 
