@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#if (defined CCNI) || (defined BGQ)
+#ifdef BGQ
 #include<mpi.h>
 #endif
 #include"MMSP.hpp"

@@ -1,4 +1,4 @@
-// tricrystal.hpp
+// tricrystal.cpp
 // Anisotropic coarsening algorithms for 2D and 3D sparse phase field (sparsePF) methods
 // Questions/comments to gruberja@gmail.com (Jason Gruber)
 
@@ -207,7 +207,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			// Scan along just above the mid-line for the grain boundary.
 			// When found, determine its angle.
 			vector<int> x(dim, 0);
-			const int delta = 2;
+			const int offset = 2;
 
 			const phi_type vert_mag = 1.0/std::sqrt(3.0);
 			const phi_type edge_mag = 1.0/std::sqrt(2.0);
@@ -218,7 +218,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 
 			x[0] = x0(newGrid,0);
 			x[1] = (g1(newGrid,1) - g0(newGrid,1))/2;
-			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) &&  newGrid(x).getMagPhi() > vert_contour)
+			while (x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>vert_contour)
 				x[0]++;
 			if (x[0] == x1(newGrid))
 				x[0] = g0(newGrid,0);
@@ -227,7 +227,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			MPI::COMM_WORLD.Allreduce(&x[0], &v0, 1, MPI_INT, MPI_MAX);
 			#endif
 
-			x[1] += delta;
+			x[1] += offset;
 			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
 			if (x[0] == x1(newGrid))
@@ -237,7 +237,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 			MPI::COMM_WORLD.Allreduce(&x[0], &v1, 1, MPI_INT, MPI_MAX);
 			#endif
 
-			x[1] += delta;
+			x[1] += offset;
 			while (x[0]>= x0(newGrid) && x[0]<x1(newGrid) && x[1]>=y0(newGrid) && x[1]<y1(newGrid) && newGrid(x).getMagPhi()>edge_contour)
 				x[0]++;
 			if (x[0] == x1(newGrid))
@@ -249,7 +249,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 
 			// Second-order right-sided difference to approximate slope
 			double diffX = 3.0*v0 - 4.0*v1 + 1.0*v2;
-			double theta = 180.0/M_PI * std::atan2(2.0*delta*dx(newGrid,1), dx(newGrid,0)*diffX);
+			double theta = 180.0/M_PI * std::atan2(2.0*offset*dx(newGrid,1), dx(newGrid,0)*diffX);
 
 			if (rank==0)
 				vfile << dx(newGrid,0)*v0 << '\t' << dx(newGrid,0)*v1 << '\t' << dx(newGrid,0)*v2 << '\t' << diffX << '\t' << theta << '\n';
@@ -261,15 +261,14 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 
 	if (rank==0)
 		vfile.close();
-
 }
 
 template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s)
 {
-	o<<"	Index  Value\n";
+	o<<"    Index  Value\n";
 	for (int i=0; i<length(s); ++i) {
 		int pindex = index(s, i);
-		o<<"	"<<std::setw(5)<<std::right<<pindex<<"  "<<s[pindex]<<'\n';
+		o<<"    "<<std::setw(5)<<std::right<<pindex<<"  "<<s[pindex]<<'\n';
 	}
 	return o;
 }

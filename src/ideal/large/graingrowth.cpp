@@ -48,7 +48,7 @@ void generate(int dim, char* filename)
 	}
 	#endif
 	if (dim == 2)	{
-		int edge = 8192;
+		const int edge = 8192;
 		int number_of_fields = 5120000;
 		grid<2,sparse<phi_type> > initGrid(0, 0, edge, 0, edge);
 		if (rank==0) std::cout<<"Grid origin: ("<<g0(initGrid,0)<<','<<g0(initGrid,1)<<"),"
@@ -63,8 +63,8 @@ void generate(int dim, char* filename)
 		if (rank==0) std::cout<<"."<<std::endl;
 
 		#if (!defined MPI_VERSION) && (defined BGQ)
-		std::cerr<<"Error: CCNI requires MPI."<<std::endl;
-		std::exit(1);
+		std::cerr<<"Error: Blue Gene requires MPI."<<std::endl;
+		std::exit(-1);
 		#endif
 		tstart = time(NULL);
 		tessellate<2,phi_type>(initGrid, number_of_fields);
@@ -81,8 +81,8 @@ void generate(int dim, char* filename)
 template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 {
 	#if (!defined MPI_VERSION) && (defined BGQ)
-	std::cerr<<"Error: MPI is required for CCNI."<<std::endl;
-	exit(1);
+	std::cerr<<"Error: Blue Gene requires MPI."<<std::endl;
+	exit(-1);
 	#endif
 	int rank=0;
 	#ifdef MPI_VERSION
@@ -92,11 +92,9 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 	const phi_type width = 14.5;
 	const phi_type epsilon = 1.0e-8;
 
-	static int iterations = 1;
-
 	for (int step = 0; step < steps; step++) {
 		if (rank==0) print_progress(step, steps);
-		// update grid must be overwritten each time
+		// newGrid must be overwritten each time
 		ghostswap(oldGrid);
 		grid<dim, sparse<phi_type> > newGrid(oldGrid);
 
@@ -152,7 +150,7 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 					}
 				}
 
-				// compute update values
+				// compute new values
 				phi_type sum = 0.0;
 				for (int h = 0; h < length(s); h++) {
 					int sindex = index(s, h);
@@ -175,7 +173,6 @@ template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
 		swap(oldGrid, newGrid);
 	} // Loop over steps
 	ghostswap(oldGrid);
-	++iterations;
 }
 
 template <class T> std::ostream& operator<<(std::ostream& o, sparse<T>& s)

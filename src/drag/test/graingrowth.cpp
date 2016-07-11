@@ -76,7 +76,6 @@ void generate(int dim, char* filename)
 		output(initGrid, filename);
 		if (rank==0) std::cout<<"Voronoi tessellation written to "<<filename<<" ("<<time(NULL)-tstart<<" sec)."<<std::endl;
 	}
-
 }
 
 template <int dim> void update(grid<dim, sparse<phi_type> >& oldGrid, int steps)
