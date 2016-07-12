@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 					std::map<grainid,std::set<int> >::const_iterator i=grainverts.find(id);
 					std::map<grainid,std::map<grainid,std::vector<int> > >::const_iterator k=grainfaces.find(id);
 					std::map<grainid,std::set<std::vector<int> > >::const_iterator l=graincycles.find(id);
-					const int A=unitsz*(szitr!=grainsizes.end())?szitr->second:0.0;
+					const double A=unitsz*(szitr!=grainsizes.end())?szitr->second:0.0;
 					const int v=(i!=grainverts.end())?i->second.size():0;
 					const int e=j->second.size();
 					const int f=(k!=grainfaces.end())?k->second.size():0;
@@ -538,7 +538,7 @@ int main(int argc, char* argv[])
 					std::map<grainid,std::set<int> >::const_iterator i=grainverts.find(id);
 					std::map<grainid,std::map<grainid,std::vector<int> > >::const_iterator k=grainfaces.find(id);
 					std::map<grainid,std::set<std::vector<int> > >::const_iterator l=graincycles.find(id);
-					const int A=unitsz*(szitr!=grainsizes.end())?szitr->second:0.0;
+					const double A=unitsz*(szitr!=grainsizes.end())?szitr->second:0.0;
 					const int v=(i!=grainverts.end())?i->second.size():0;
 					const int e=j->second.size();
 					const int f=(k!=grainfaces.end())?k->second.size():0;
