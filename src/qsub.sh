@@ -17,4 +17,4 @@ then
 	cd drag
 fi
 
-qsub -cwd -m be -M tnk10 -pe nodal $CORES -q rack4,rack5 $SCRIPT
+qsub -cwd -m be -M tnk10 -pe nodal $CORES -q rack5 $SCRIPT
