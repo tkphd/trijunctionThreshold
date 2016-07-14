@@ -135,9 +135,6 @@ int main(int argc, char* argv[])
 							else if (c > static_cast<unsigned char>(128)) pathways(*(it_path))=128;
 							else pathways(*(it_path))=c-static_cast<unsigned char>(32);
 						}
-						//it_v0++;
-						//it_v1++;
-						//}
 					}
 				}
 				for (int v=0; v<int(global_vertices.size()); v++) {
@@ -158,7 +155,7 @@ int main(int argc, char* argv[])
 				MMSP::grid<2,double> capped(curvature);
 				#pragma omp parallel for
 				for (int i=0; i<nodes(capped); i++)
-					capped(i) = (curvature(i)>2.5) ? 2.5 : curvature(i);
+					capped(i) = (curvature(i)>7.0) ? 7.0 : curvature(i);
 				MMSP::output(capped, altfile.c_str());
 
 				altfile.resize(altfile.length()-8);
@@ -473,7 +470,6 @@ int main(int argc, char* argv[])
 						std::set<int>::const_iterator it_v0=it_edg->begin();
 						std::set<int>::const_iterator it_v1(it_v0);
 						it_v1++;
-						//while (it_v1!=it_edg->end()) {
 						// v0 and v1 are the endpoints of an edge. Count 'em.
 						++vertex_hits[*it_v0];
 						++vertex_hits[*it_v1];
@@ -483,9 +479,6 @@ int main(int argc, char* argv[])
 							else if (c > static_cast<unsigned char>(128)) pathways(*(it_path))=128;
 							else pathways(*(it_path))=c-static_cast<unsigned char>(32);
 						}
-						//it_v0++;
-						//it_v1++;
-						//}
 					}
 				}
 				for (int v=0; v<int(global_vertices.size()); v++) {
@@ -506,7 +499,7 @@ int main(int argc, char* argv[])
 				MMSP::grid<2,double> capped(curvature);
 				#pragma omp parallel for
 				for (int i=0; i<nodes(capped); i++)
-					capped(i) = (curvature(i)>2.5) ? 2.5 : curvature(i);
+					capped(i) = (curvature(i)>8.0) ? 8.0 : curvature(i);
 				MMSP::output(capped, altfile.c_str());
 
 				altfile.resize(altfile.length()-8);

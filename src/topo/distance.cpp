@@ -27,9 +27,10 @@ template <int dim, typename T> double radius(const MMSP::vector<T>& a, const MMS
 {
 	double radius=0.0;
 	for (int d=0; d<dim; d++)
-		radius+=std::pow(double(b[d]-a[d]), 2.0);
+		radius += (b[d]-a[d]) * (b[d]-a[d]);
 	return sqrt(radius);
 }
+
 
 MMSP::vector<int> getPosition(const SparseDistanceVoxel& dv)
 {
@@ -38,6 +39,7 @@ MMSP::vector<int> getPosition(const SparseDistanceVoxel& dv)
 		x[d]=dv.getPosition(d);
 	return x;
 }
+
 
 template<int dim, typename T, typename U>
 void propagate_cost(const SparseDistanceVoxel* core_voxel,
@@ -121,20 +123,19 @@ void propagate_cost(const SparseDistanceVoxel* core_voxel,
 	}
 } // propagate_cost
 
+
 template<int dim, typename T>
 bool isLocalMin(const MMSP::grid<dim,MMSP::sparse<T> >& grid, const MMSP::vector<int> position)
 {
-	double epsilon=sqrt(std::numeric_limits<double>::epsilon());
 	MMSP::vector<int> x(position);
 	const double center=grid(x).getMagPhi();
 
 	if (grid(x).length() <= dim) return false;
 
 	if (dim==2) {
-		for (x[1]=position[1]-2; x[1]<=position[1]+2; x[1]++) {
-			for (x[0]=position[0]-2; x[0]<=position[0]+2; x[0]++) {
+		for (x[1]=position[1]-1; x[1]<=position[1]+1; x[1]++) {
+			for (x[0]=position[0]-1; x[0]<=position[0]+1; x[0]++) {
 				if (x[0]==position[0] && x[1]==position[1]) continue; // know thyself
-				else if (radius<2>(position,x)>2.0+epsilon) continue; // skip cube corners
 				MMSP::vector<int> p(x);
 				for (int d=0; d<dim; d++)
 					MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),MMSP::b0(grid,d),MMSP::b1(grid,d));
@@ -142,11 +143,10 @@ bool isLocalMin(const MMSP::grid<dim,MMSP::sparse<T> >& grid, const MMSP::vector
 			}
 		}
 	} else if (dim==3) {
-		for (x[2]=position[2]-2; x[2]<=position[2]+2; x[2]++) {
-			for (x[1]=position[1]-2; x[1]<=position[1]+2; x[1]++) {
-				for (x[0]=position[0]-2; x[0]<=position[0]+2; x[0]++) {
+		for (x[2]=position[2]-1; x[2]<=position[2]+1; x[2]++) {
+			for (x[1]=position[1]-1; x[1]<=position[1]+1; x[1]++) {
+				for (x[0]=position[0]-1; x[0]<=position[0]+1; x[0]++) {
 					if (x[0]==position[0] && x[1]==position[1] && x[2]==position[2]) continue; // know thyself
-					else if (radius<3>(position,x)>3.0+epsilon) continue; // skip cube corners
 					MMSP::vector<int> p(x);
 					for (int d=0; d<dim; d++)
 						MMSP::check_boundary(p[d],MMSP::x0(grid,d),MMSP::x1(grid,d),MMSP::b0(grid,d),MMSP::b1(grid,d));
@@ -157,6 +157,7 @@ bool isLocalMin(const MMSP::grid<dim,MMSP::sparse<T> >& grid, const MMSP::vector
 	}
 	return true;
 } // isLocalMin
+
 
 template<int dim, typename T>
 void locate_vertices(const MMSP::grid<dim,MMSP::sparse<T> >& grid, std::map<int,double>& grainsizes, std::vector<MMSP::vector<int> >& global_vertices)
@@ -187,6 +188,7 @@ void locate_vertices(const MMSP::grid<dim,MMSP::sparse<T> >& grid, std::map<int,
 	}
 } // locate_vertices
 
+
 template<int dim, typename T>
 void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
                        const std::vector<MMSP::vector<int> >& global_vertices,
@@ -195,7 +197,7 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 	double min=M_PI; // pi will not naturally occur: if you see it, something's wrong
 	double max=-M_PI;
 	double bulk_penalty = 1000.0;
-	double bulk_threshold = 1.01 / sqrt(2.0); // must be above 0.70711, the magnitude of an edge
+	double bulk_threshold = 0.7125; //1.01 / sqrt(2.0); // must be above 0.70711, the magnitude of an edge
 
 	double epsilonsq = 4.5e-5;
 
@@ -380,6 +382,7 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 	}
 } // determine_weights
 
+
 template<int dim, typename T, typename U>
 void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
                       const MMSP::grid<dim,T>& cost,
@@ -462,6 +465,7 @@ void approximate_cost(const MMSP::grid<dim,MMSP::sparse<U> >& phi,
 	}
 } // approximate_cost
 
+
 template <int dim, typename T>
 void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
                    const MMSP::grid<dim,SparseDistanceVoxel>& dist_grid,
@@ -511,21 +515,24 @@ void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
 						MMSP::check_boundary(p[d],MMSP::x0(dist_grid,d),MMSP::x1(dist_grid,d),MMSP::b0(dist_grid,d),MMSP::b1(dist_grid,d));
 
 					const SparseDistanceVoxel* TestVoxel = &(dist_grid(p));
-					if (TestVoxel->length()<2) continue;
 					const SparseDistanceVoxel* BestVoxel = &(dist_grid(best));
+
 					bool isCloserToTarget = (  TestVoxel->getValue(id)            < BestVoxel->getValue(id) );
 					bool isStillClosest = (    TestVoxel->getValue(closestVertex) < BestVoxel->getValue(id) + sqrt(epsilon));
 					bool isCloserToClosest = ( TestVoxel->getValue(closestVertex) < BestVoxel->getValue(closestVertex));
 					bool isAlongEdge = isCloserToTarget && isStillClosest && isCloserToClosest;
+
 					if (isAlongEdge) {
 						// Check whether another vertex is closer
 						for (int i=0; i<TestVoxel->length(); i++) {
 							int vid = TestVoxel->index(i);
 							if (vid==closestVertex) continue;
+
 							bool isCloserThanClosest = (  TestVoxel->getValue(vid) < TestVoxel->getValue(closestVertex) );
-							bool isCloserThanTarget = (   TestVoxel->getValue(vid) < TestVoxel->getValue(id) );
+							bool isCloserThanTarget = (   TestVoxel->getValue(vid) < BestVoxel->getValue(vid) );
 							bool isBetweenStartFinish = ( TestVoxel->getValue(vid) < dist_grid(start).getValue(vid) );
-							if (isCloserThanClosest && isCloserThanTarget && isBetweenStartFinish)
+
+							if (isBetweenStartFinish && isCloserThanClosest && isCloserThanTarget)
 								closestVertex=vid;
 						}
 						bool isSteppingCloser = ( TestVoxel->getValue(closestVertex) < BestVoxel->getValue(closestVertex) );
@@ -554,7 +561,6 @@ void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
 							MMSP::check_boundary(p[d],MMSP::x0(dist_grid,d),MMSP::x1(dist_grid,d),MMSP::b0(dist_grid,d),MMSP::b1(dist_grid,d));
 
 						const SparseDistanceVoxel* TestVoxel = &(dist_grid(p));
-						if (TestVoxel->length()<3) continue;
 						const SparseDistanceVoxel* BestVoxel = &(dist_grid(best));
 						bool isCloserToTarget = (  TestVoxel->getValue(id)            < BestVoxel->getValue(id) );
 						bool isStillClosest = (    TestVoxel->getValue(closestVertex) < BestVoxel->getValue(id) + sqrt(epsilon));
@@ -593,6 +599,7 @@ void trace_pathway(const MMSP::grid<dim,MMSP::sparse<T> >& phase_grid,
 	path[id] = trial;
 } // trace_pathway
 
+
 template <int dim, typename T>
 void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
                   const MMSP::grid<dim,SparseDistanceVoxel>& distance,
@@ -607,11 +614,13 @@ void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 			int v1=distance(global_vertices[v0]).index(j);
 
 			// Attempt walking from v0 to v1. Store valid walks in global_edges.
-			if (v1==v0) {
+
+			if (v1==v0)
 				continue; // no loops
-			} else if (global_edges[v0].find(v1)!=global_edges[v0].end() && global_edges[v0].find(v1)->second.size()>0) {
+			else if (global_edges[v0].find(v1)!=global_edges[v0].end() // edge exists
+			         && global_edges[v0].find(v1)->second.size()>0)    // edge length is non-zero
 				continue; // edge already exists
-			} else {
+			else {
 				trace_pathway(grid,distance,v1,global_vertices[v0],global_vertices[v1],global_edges[v0]);
 				// Check whether path (v0,v1) was constructed.
 				std::map<grainid,std::vector<MMSP::vector<int> > >::iterator m=global_edges[v0].find(v1);
@@ -635,6 +644,7 @@ void locate_edges(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 		}
 	}
 } // locate_edges
+
 
 template <int dim, typename T>
 void search_cycles(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
@@ -857,25 +867,32 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 					c1.pop_back();
 					std::sort(c1.begin(),c1.end());
 					if (c0==c1) {
-						// This cycle is shared with another grain. Rejoice!
-						grainfaces[it_g0->first][it_g1->first]=*it_c0;
 						cyclecount++;
+						if (dim==2) {// This cycle belongs to more than one grain. Erase it from the other, and keep searching.
+							std::set<std::vector<int> >::iterator badc(it_c1);
+							it_c1--;
+							it_g1->second.erase(badc);
+						}
+						if (dim==3) // This cycle is shared with another grain. Rejoice!
+							grainfaces[it_g0->first][it_g1->first]=*it_c0;
 					}
 				}
 			}
+
 			/*
 			if (dim==3 && cyclecount==0) {
 				// This cycle only contributed to this grain. Erase it.
-				std::set<std::vector<int> >::iterator badc(it_cyc);
-				it_cyc--;
-				it_g0->second.erase(badc);
-			} else if (dim==2 && cyclecount>0) {
-				// This cycle contributed to more than one grain. Erase it.
-				std::set<std::vector<int> >::iterator badc(it_cyc);
-				it_cyc--;
+				std::set<std::vector<int> >::iterator badc(it_c0);
+				it_c0--;
 				it_g0->second.erase(badc);
 			}
 			*/
+			if (dim==2 && cyclecount>0) {
+				// This cycle contributed to more than one grain. Erase it.
+				std::set<std::vector<int> >::iterator badc(it_c0);
+				it_c0--;
+				it_g0->second.erase(badc);
+			}
 		}
 	} // assign faces
 
@@ -900,7 +917,9 @@ int assign_features(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 				if (it_v0!=it_cyc->end() && it_v1!=it_cyc->end())
 					edgecount++; // both vertices on this edge belong to this cycle
 			} // loop over cycles of this grain
-			if (dim==3 && edgecount==0) {// Edge contributed to one cycle. Prune it.
+			// DANGER
+			//if (dim==3 && edgecount==0) {// Edge contributed to one cycle. Prune it.
+			if (edgecount==0) {// Edge contributed to one cycle. Prune it.
 				std::set<std::set<int> >::iterator bade(it_edg);
 				it_edg--;
 				it_grn_edg->second.erase(bade);
