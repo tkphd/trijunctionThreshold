@@ -189,6 +189,7 @@ template <typename T> void sparse_graph(const MMSP::grid<2,MMSP::sparse<T> >& gr
 	printf("%4d stable of %4lu total vertices (%3.0f%%). ", plateaunic, global_vertices.size(),100.0*plateaunic/global_vertices.size());
 	MMSP::output(pathways, altfile.c_str());
 
+	#ifdef DEBUG
 	altfile.resize(altfile.length()-8);
 	altfile.append("curv.dat");
 	MMSP::grid<2,double> capped(curvature);
@@ -196,6 +197,7 @@ template <typename T> void sparse_graph(const MMSP::grid<2,MMSP::sparse<T> >& gr
 	for (int i=0; i<nodes(capped); i++)
 		capped(i) = (curvature(i)>7.0) ? 7.0 : curvature(i);
 	MMSP::output(capped, altfile.c_str());
+	#endif
 
 	altfile.resize(altfile.length()-8);
 	altfile.append("topo.csv");
