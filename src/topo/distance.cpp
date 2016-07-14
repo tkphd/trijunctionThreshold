@@ -192,10 +192,10 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
                        const std::vector<MMSP::vector<int> >& global_vertices,
                        MMSP::grid<dim,double>& cost)
 {
-	const double fmax=2.0;
-	const double fmin=0.0;
-	double min=M_PI; //sqrt(std::numeric_limits<float>::max());
-	double max=-M_PI; //-sqrt(std::numeric_limits<float>::max());
+	double min=M_PI; // pi will not naturally occur: if you see it, something's wrong
+	double max=-M_PI;
+	double bulk_penalty = 1000.0;
+	double bulk_threshold = 1.01 / sqrt(2.0); // must be above 0.70711, the magnitude of an edge
 
 	double epsilonsq = 4.5e-5;
 
@@ -281,11 +281,12 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 
 		#pragma omp parallel for
 		for (int i=0; i<MMSP::nodes(cost); i++) {
+			// Set high cost in bulk, and bump grain boundary costs positive
 			MMSP::vector<int> x = position(cost, i);
-			if (magnitude(x) > 0.725)
-				cost(i) = 10.0*fmax; // high cost in bulk
+			if (magnitude(x) > bulk_threshold)
+				cost(i) = bulk_penalty * max;
 			else
-				cost(i) = fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
+				cost(i) = cost(i) - min;
 		}
 	} else if (dim==3) {
 		// Cost of moving through the grain boundary equals the curvature of |phi| at
@@ -369,11 +370,12 @@ void determine_weights(const MMSP::grid<dim,MMSP::sparse<T> >& grid,
 
 		#pragma omp parallel for
 		for (int i=0; i<MMSP::nodes(cost); i++) {
+			// Set high cost in bulk, and bump grain boundary costs positive
 			MMSP::vector<int> x = position(cost, i);
-			if (magnitude(x) > 0.725)
-				cost(i) = 10.0*fmax; // high cost in bulk
+			if (magnitude(x) > bulk_threshold)
+				cost(i) = bulk_penalty * max;
 			else
-				cost(i) = fmin+(fmax-fmin)*(cost(i)-min)/(max-min); // rescale on [fmin,fmax]
+				cost(i) = cost(i) - min;
 		}
 	}
 } // determine_weights
