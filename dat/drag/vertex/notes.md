@@ -114,7 +114,7 @@
 * Grain 0 collapsed at t = 156,030&times;dt, V = 54.4&times;dV
 
 
-### mmsp2graph results
+# mmsp2graph results
 | &delta; (&Delta;x) | Steps (&Delta;t) | Area (&Delta;x²) | Separation (&Delta;x) | Time/100k (sec) | Ideal Time (sec) |
 | -----------------: | ---------------: | ---------------: | --------------------: | --------------: | ---------------: |
 |  2.0               |      --          | --               | --                    | 4,597           | --               |
@@ -131,7 +131,7 @@
 
 
 
-### mmsp2topo results
+# mmsp2topo results
 | &delta; (&Delta;x) | Steps (&Delta;t) | Area (&Delta;x²) | Separation (&Delta;x) |
 | -----------------: | ---------------: | ---------------: | --------------------: |
 |  2.0               |   --             | --               | --                    |

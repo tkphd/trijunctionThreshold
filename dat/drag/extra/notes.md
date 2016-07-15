@@ -1,7 +1,8 @@
 # Extra large grid (16384<sup>2</sup>)
 
-## run10: TK_R3_p
-* AMOS job
+# AMOS
+## run10: TK_R3_p147
+* AMOS job 580447
 * initial condition: copied ideal/extra/extra.dat with 20,480,000 seeds
 * Annulus: x = 0.6422, s = 0.0175 
 * m<sub>tj</sub> = 0.01
