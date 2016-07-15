@@ -8,8 +8,8 @@
 # Declare common SLURM settings
 
 # Working directory and output file (datafiles  and stdout redirect)
-#SBATCH -D /gpfs/u/scratch/GGST/GGSTkllt/trijunctionThreshold/ideal/test
-#SBATCH -o /gpfs/u/barn/GGST/GGSTkllt/trijunctionThreshold/dat/ideal/AMOS_test_init.log
+#SBATCH -D /gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/test
+#SBATCH -o /gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/dat/ideal/AMOS_test_init.log
 
 # Cluster partition and job size
 #SBATCH --partition small
@@ -21,14 +21,14 @@
 
 # When and to whom notifications should be sent
 #SBATCH --mail-type=END
-#SBATCH --mail-user=kellet@rpi.edu
+#SBATCH --mail-user=lewisd2@rpi.edu
 
 if [[ ! -d $SLURM_SUBMIT_DIR ]]
 then
 	mkdir -p $SLURM_SUBMIT_DIR
 fi
 
-SRCDIR=/gpfs/u/barn/GGST/GGSTkllt/trijunctionThreshold/src/ideal/test
+SRCDIR=/gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/src/ideal/test
 
 if [[ ! -f $SRCDIR/q_GG.out ]]
 then
