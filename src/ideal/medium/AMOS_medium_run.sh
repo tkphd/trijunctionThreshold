@@ -7,7 +7,6 @@
 # Declare common SLURM settings
 
 # Working directory and output file (datafiles  and stdout redirect)
-#SBATCH -D /gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/medium/run10
 #SBATCH -o /gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/dat/ideal/AMOS_medium_run10.log
 
 # Cluster partition and job size
@@ -22,11 +21,6 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=lewisd2@rpi.edu
 
-if [[ ! -d $SLURM_SUBMIT_DIR ]]
-then
-	mkdir -p $SLURM_SUBMIT_DIR
-fi
-
 SRCDIR=/gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/src/ideal/medium
 
 if [[ ! -f $SRCDIR/q_GG.out ]]
@@ -35,5 +29,11 @@ then
 	exit
 fi
 
+DATDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/medium/run10
+if [[ ! -d $DATDIR ]]
+then
+	mkdir -p $DATDIR
+fi
+
 cp ../qmedium.dat ./
-srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qmedium.dat 100000 5000
+srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qmedium.dat 100000 5000

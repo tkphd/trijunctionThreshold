@@ -8,7 +8,6 @@
 # Declare common SLURM settings
 
 # Working directory and output file (datafiles  and stdout redirect)
-#SBATCH -D /gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/large
 #SBATCH -o /gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/dat/ideal/AMOS_large_init.log
 
 # Cluster partition and job size
@@ -23,17 +22,17 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=lewisd2@rpi.edu
 
-if [[ ! -d $SLURM_SUBMIT_DIR ]]
-then
-	mkdir -p $SLURM_SUBMIT_DIR
-fi
-
 SRCDIR=/gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/src/ideal/large
-
 if [[ ! -f $SRCDIR/q_GG.out ]]
 then
 	echo "Error: ${SRCDIR}/q_GG.out not found: cd ${SRCDIR} && make bgq"
 	exit
 fi
 
-srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out --example 2 qlarge.dat
+DATDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/large
+if [[ ! -d $DATDIR ]]
+then
+	mkdir -p $DATDIR
+fi
+
+srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out --example 2 qlarge.dat
