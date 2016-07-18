@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	// help diagnostic
 	if (std::string(argv[1]) == "--help") {
 		std::cout << argv[0] << ": convert MMSP grid data to PNG image format.\n";
-		std::cout << "Usage:    " << argv[0] << " [--help] [--slice=X,n] [--zoom] [--contour=n,a,b] [--mag|--field=n|--exclude=n] [--invert] infile [outfile]\n\n";
+		std::cout << "Usage:    " << argv[0] << " [--help] [--slice=X,n] [--zoom] [--contour=n,a,b] [--fit|--mag|--field=n|--exclude=n] [--invert] infile [outfile]\n\n";
 		std::cout << "Examples: " << argv[0] << " --help\n"
 		          << "             displays this message.\n";
 		std::cout << "          " << argv[0] << " infile\n"
@@ -70,6 +70,8 @@ int main(int argc, char* argv[])
 		          << "             If infile is 3-D, holds X-coord constant at the midpoint.\n";
 		std::cout << "          " << argv[0] << " --mob infile\n"
 		          << "             writes mobility associated with magnitude of infile values to infile.png\n";
+		std::cout << "          " << argv[0] << " --fit infile\n"
+		          << "             fits analytical curve to tricrystal profile and overlays onto infile.png\n";
 		std::cout << "          " << argv[0] << " --zoom infile\n"
 		          << "             writes magnitude of infile values to infile.png, bounded by data min and max exactly.\n"
 		          << "             Use in conjunction with any other flag for data with very small values.\n";
