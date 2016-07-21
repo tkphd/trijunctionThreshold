@@ -36,5 +36,5 @@ fi
 
 INIDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/test
 
-cp $INIDIR/qtest.dat /
-srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qtest.dat 100000 5000
+cp $INIDIR/qtest.dat $DATDIR/
+srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out $DATDIR/qtest.dat 100000 5000
