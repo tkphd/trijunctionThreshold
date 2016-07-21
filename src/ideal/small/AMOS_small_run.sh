@@ -22,9 +22,9 @@
 #SBATCH --mail-user=lewisd2@rpi.edu
 
 SRCDIR=/gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/src/ideal/small
-if [[ ! -f $SRCDIR/q_GG.out ]]
+if [[ ! -f $SRCD$INIDIR/q_GG.out ]]
 then
-	echo "Error: ${SRCDIR}/q_GG.out not found: cd ${SRCDIR} && make bgq"
+	echo "Error: ${SRCDI$INIDIR/q_GG.out not found: cd ${SRCDIR} && make bgq"
 	exit
 fi
 
@@ -34,5 +34,7 @@ then
 	mkdir -p $DATDIR
 fi
 
-cp ../qsmall.dat ./
+INIDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/small
+
+cp $INIDIR/qsmall.dat $DATDIR/
 srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qsmall.dat 100000 5000
