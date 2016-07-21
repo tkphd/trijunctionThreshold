@@ -8,7 +8,7 @@
 # Declare common SLURM settings
 
 # Working directory and output file (datafiles  and stdout redirect)
-#SBATCH -o /gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/ideal/AMOS_small_init.log
+#SBATCH -o /gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/dat/ideal/AMOS_small_init.log
 
 # Cluster partition and job size
 #SBATCH --partition small
