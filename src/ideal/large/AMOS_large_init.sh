@@ -37,5 +37,5 @@ fi
 
 if [[ ! -f $DATDIR/qlarge.dat ]]
 then
-	srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out --example 2 qlarge.dat
+	srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out --example 2 $DATDIR/qlarge.dat
 fi
