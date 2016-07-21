@@ -23,9 +23,9 @@
 
 SRCDIR=/gpfs/u/barn/GGST/GGSTlwsd/trijunctionThreshold/src/ideal/medium
 
-if [[ ! -f $SRCD$INIDIR/q_GG.out ]]
+if [[ ! -f $SRCDIR/q_GG.out ]]
 then
-	echo "Error: ${SRCDI$INIDIR/q_GG.out not found: cd ${SRCDIR} && make bgq"
+	echo "Error: ${SRCDIR}/q_GG.out not found: cd ${SRCDIR} && make bgq"
 	exit
 fi
 
@@ -35,7 +35,5 @@ then
 	mkdir -p $DATDIR
 fi
 
-INIDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/medium
-
-cp $INIDIR/qmedium.dat $DATDIR/
+cp ../qmedium.dat ./
 srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qmedium.dat 100000 5000

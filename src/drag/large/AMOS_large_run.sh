@@ -34,7 +34,5 @@ then
 	mkdir -p $DATDIR
 fi
 
-INIDIR=/gpfs/u/scratch/GGST/GGSTlwsd/trijunctionThreshold/ideal/large
-
-cp $INIDIR/qlarge.dat $DATDIR/
+cp ../../ideal/large/qlarge.dat ./
 srun -D $DATDIR --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out qlarge.dat 100000 5000
