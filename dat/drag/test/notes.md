@@ -12,14 +12,14 @@
 * 64 cores: runtime 16700 seconds
 
 ## run2: TK_R3_p139
-* CTCMS job 2502519 (Job 2501302 died)
+* CTCMS job 2661517 (Jobs 2501302 and 2502519 died)
 * initial condition: copied ideal/test/test.dat
 * Annulus: x = 0.6422, s = 0.0175
 * m<sub>tj</sub> = 0.01
 * width=14.5
 * dt = 0.01
 * t = 100,000&times;dt
-* 64 cores: runtime 
+* 64 cores: runtime 16603 sec. (4h:36m:43s)
 	
 
 # AMOS

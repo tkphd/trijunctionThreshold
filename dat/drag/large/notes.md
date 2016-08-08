@@ -9,7 +9,7 @@
 * width=14.5
 * dt = 0.01
 * t = 100,000&times;dt
-* 64 cores: runtime 
+* 64 cores: runtime 1036081 sec. (11d:23h:48m:01s)
 
 
 # AMOS

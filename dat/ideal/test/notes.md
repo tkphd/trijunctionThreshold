@@ -21,7 +21,7 @@
 * width=14.5
 * dt = 0.01
 * t = 100,000&times;dt
-* 64 cores: runtime 17728 seconds
+* 64 cores: runtime 17727 seconds
 
 
 
