@@ -35,7 +35,7 @@ then
 	mkdir -p $DATDIR
 fi
 
-if [[ ! -f $DATDIR/qextra.dat]]
+if [[ ! -f $DATDIR/qextra.dat ]]
 then
 	srun --runjob-opts="--mapping TEDCBA" $SRCDIR/./q_GG.out --example 2 $DATDIR/qextra.dat
 fi
